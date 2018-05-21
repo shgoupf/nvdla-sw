@@ -26,6 +26,9 @@
 
 MODULE_SRCDIR := $(MODULE)
 
+MODULE_CC := gcc
+MODULE_LD := ld
+
 # build with default toolchain/arch, unless module has overridden it
 ifeq ($(MODULE_CC),)
 MODULE_CC := $(TOOLCHAIN_PREFIX)gcc
