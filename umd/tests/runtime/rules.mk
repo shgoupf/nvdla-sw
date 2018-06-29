@@ -32,7 +32,7 @@ NVDLA_SRC_FILES := \
     Server.cpp \
     RuntimeTest.cpp \
     TestUtils.cpp \
-    main.cpp
+    nvdla_capi_test.cpp
 
 INCLUDES += \
     -I$(ROOT)/include \
