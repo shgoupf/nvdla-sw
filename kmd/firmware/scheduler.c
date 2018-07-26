@@ -37,7 +37,7 @@
 
 #define MAX_NUM_ADDRESSES	256
 
-static uint64_t roi_array_length __aligned(8);
+static uint64_t roi_array_length __attribute__ ((aligned(8)));
 static struct dla_network_desc network;
 
 static int

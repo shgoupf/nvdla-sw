@@ -1,4 +1,4 @@
-# Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
+# Copyright (c) 2017-2018, NVIDIA CORPORATION. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,33 +24,31 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ROOT := $(TOP_KMD)
+LOCAL_DIR := $(GET_LOCAL_DIR)
 
-TOOLCHAIN_PREFIX ?=
+NVDLA_FIRMWARE_SRC_FILES := \
+    scheduler.c \
+    engine.c \
+    bdma.c \
+    conv.c \
+    sdp.c \
+    cdp.c \
+    pdp.c \
+    rubik.c \
+    cache.c \
+    common.c \
+    engine_data.c \
+    engine_isr.c \
+    engine_debug.c
 
-ifeq ($(TOOLCHAIN_PREFIX),)
-$(error Toolchain prefix missing)
-endif
+INCLUDES += \
+    -I$(ROOT)/include \
+    -I$(ROOT)/firmware/include \
+    -I$(LOCAL_DIR)
 
-MODULE := libnvdla_firmware
+#MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_FIRMWARE\""
+#MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_FIRMWARE\""
 
-include $(ROOT)/make/macros.mk
+MODULE_SRCS := $(NVDLA_FIRMWARE_SRC_FILES)
 
-BUILDOUT ?= $(ROOT)/out/firmware
-BUILDDIR := $(BUILDOUT)/$(MODULE)
-LIB := $(BUILDDIR)/$(MODULE).so
-
-INCLUDES :=
-MODULE_OPTFLAGS ?= -Os
-MODULE_COMPILEFLAGS := -g -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Werror-implicit-function-declaration
-MODULE_CFLAGS := --std=c99
-MODULE_CPPFLAGS := --std=c++11 -fexceptions -fno-rtti
-
-all:: $(LIB)
-
-include rules.mk
-
-# the logic to compile and link stuff is in here
-$(LIB): $(ALLMODULE_OBJS)
-	@echo building $(MODULE)  $@
-	$(TOOLCHAIN_PREFIX)g++ -shared $(ALLMODULE_OBJS) -o $@
+include $(ROOT)/make/module.mk

@@ -77,8 +77,8 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
     int err = 0;
     NvDlaMemHandle hMem;
     struct drm_prime_handle req;
-    struct nvdla_gem_create_args create_args;
-    struct nvdla_gem_map_offset_args map_args;
+    struct nvdla_capi_mem_create_args create_args;
+    struct nvdla_capi_mem_map_offset_args map_args;
     NvDlaDeviceHandle hDlaDev = (NvDlaDeviceHandle)device_handle;
 
     hMem = (NvDlaMemHandle)malloc(sizeof(struct NvDlaMemHandleRec));
@@ -90,7 +90,9 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
 
     create_args.size = size;
 
-    err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_CREATE, &create_args);
+    //err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_CREATE, &create_args);
+    err = nvdla_capi_mem_create(hDlaDev->fd, &create_args, map_args->offset);
+
     if (err) {
         printf("Failed to allocate handle err=%d errno=%d\n", err, errno);
         err = -errno;
@@ -103,30 +105,30 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
     req.handle = create_args.handle;
     req.flags = DRM_CLOEXEC;
 
-    err = ioctl(hDlaDev->fd, DRM_IOCTL_PRIME_HANDLE_TO_FD, &req);
-    if (err) {
-        printf("failed to get fd for handle errno=%d\n", errno);
-        err = -errno;
-        goto free_gem_handle;
-    }
+    //err = ioctl(hDlaDev->fd, DRM_IOCTL_PRIME_HANDLE_TO_FD, &req);
+    //if (err) {
+    //    printf("failed to get fd for handle errno=%d\n", errno);
+    //    err = -errno;
+    //    goto free_gem_handle;
+    //}
 
-    hMem->fd = req.fd;
+    //hMem->fd = req.fd;
 
     memset(&map_args, 0, sizeof(map_args));
 
     map_args.handle = create_args.handle;
 
-    err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_MMAP, &map_args);
-    if (err) {
-        err = -errno;
-        goto free_mem_handle;
-    }
+    //err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_MMAP, &map_args);
+    //if (err) {
+    //    err = -errno;
+    //    goto free_mem_handle;
+    //}
 
-    err = nvdla_mem_map(pData, size, map_args.offset, hDlaDev->fd, NVDLA_MEM_WRITE | NVDLA_MEM_READ);
-    if (err) {
-        goto free_mem_handle;
-        return err;
-    }
+    //err = nvdla_mem_map(pData, size, map_args.offset, hDlaDev->fd, NVDLA_MEM_WRITE | NVDLA_MEM_READ);
+    //if (err) {
+    //    goto free_mem_handle;
+    //    return err;
+    //}
 
     return 0;
 
@@ -142,7 +144,7 @@ NvDlaError
 NvDlaFreeMem(void *session_handle, void *device_handle, void *mem_handle, void *pData, NvU32 size)
 {
     int err;
-    struct nvdla_gem_destroy_args args;
+    struct nvdla_capi_mem_destroy_args args;
     NvDlaMemHandle hMem = (NvDlaMemHandle)mem_handle;
     NvDlaDeviceHandle hDlaDev = (NvDlaDeviceHandle)device_handle;
 
@@ -162,7 +164,9 @@ NvDlaFreeMem(void *session_handle, void *device_handle, void *mem_handle, void *
 
     args.handle = hMem->prime_handle;
 
-    err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_DESTROY, &args);
+    //err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_DESTROY, &args);
+    err = nvdla_capi_mem_destroy(hDlaDev->fd, &args);
+
     if (err) {
         printf("Failed to destroy handle err=%d errno=%d\n", err, errno);
         return NvDlaError_IoctlFailed;
@@ -200,8 +204,9 @@ NvDlaSubmit(void *session_handle, void *device_handle, NvDlaTask *pTasks, NvU32 
         }
     }
 
-    if (ioctl(dla_device->fd, DRM_IOCTL_NVDLA_SUBMIT, &args) < 0) {
-        printf("%s: Error IOCTL failed (%s)\n",
+    //if (ioctl(dla_device->fd, DRM_IOCTL_NVDLA_SUBMIT, &args) < 0) {
+    if (nvdla_submit(dla_device->fd, &args) < 0) {
+        printf("%s: Error NVDLA_SUBMIT failed (%s)\n",
                         __func__, strerror(errno));
         return NvDlaError_IoctlFailed;
     }

@@ -68,7 +68,7 @@ fail:
     return e;
 }
 
-int nvdla_capi_test(int argc, char* argv[])
+int nvdla_capi_test(int argc, char* argv[], int card_no)
 {
     NvDlaError e = NvDlaError_TestApplicationFailed;
     TestAppArgs testAppArgs = defaultTestAppArgs;
@@ -161,6 +161,8 @@ int nvdla_capi_test(int argc, char* argv[])
 
     NvDlaDebugPrintf("Hello NVDLA!\n");
     std::cout << "Hello NVDLA!" << std::endl;
+
+    nvdla_probe(card_no);
 
     /* Check if any mandatory arguments are missing */
     if (strcmp(testAppArgs.loadableName.c_str(), "") == 0 && !serverMode) {

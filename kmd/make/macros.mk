@@ -24,33 +24,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ROOT := $(TOP_KMD)
 
-TOOLCHAIN_PREFIX ?=
+# Find the local dir of the make file
+GET_LOCAL_DIR    = $(patsubst %/,%,$(dir $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))))
 
-ifeq ($(TOOLCHAIN_PREFIX),)
-$(error Toolchain prefix missing)
-endif
+# makes sure the target dir exists
+MKDIR = if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
 
-MODULE := libnvdla_firmware
-
-include $(ROOT)/make/macros.mk
-
-BUILDOUT ?= $(ROOT)/out/firmware
-BUILDDIR := $(BUILDOUT)/$(MODULE)
-LIB := $(BUILDDIR)/$(MODULE).so
-
-INCLUDES :=
-MODULE_OPTFLAGS ?= -Os
-MODULE_COMPILEFLAGS := -g -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Werror-implicit-function-declaration
-MODULE_CFLAGS := --std=c99
-MODULE_CPPFLAGS := --std=c++11 -fexceptions -fno-rtti
-
-all:: $(LIB)
-
-include rules.mk
-
-# the logic to compile and link stuff is in here
-$(LIB): $(ALLMODULE_OBJS)
-	@echo building $(MODULE)  $@
-	$(TOOLCHAIN_PREFIX)g++ -shared $(ALLMODULE_OBJS) -o $@
+# prepends the BUILD_DIR var to each item in the list
+TOBUILDDIR = $(addprefix $(BUILDDIR)/,$(1))

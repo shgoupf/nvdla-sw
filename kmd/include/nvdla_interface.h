@@ -29,7 +29,9 @@
 #ifndef __NVDLA_INTERFACE_H_
 #define __NVDLA_INTERFACE_H_
 
-#include <linux/types.h>
+//#include <linux/types.h>
+#include <stdint.h>
+#include <stdio.h>
 
 /**
  * @brief			Register driver to firmware

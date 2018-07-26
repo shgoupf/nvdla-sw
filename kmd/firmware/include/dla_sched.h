@@ -29,6 +29,8 @@
 #ifndef __DLA_SCHED_H_
 #define __DLA_SCHED_H_
 
+#include <stdbool.h>
+
 struct dla_task {
 	/* platform specific data to communicate with portability layer */
 	void *task_data;
@@ -54,7 +56,7 @@ struct dla_task {
 	uint64_t surface_addr;
 	/* start address of a list of dla_stat_container */
 	uint64_t stat_data_addr;
-} __packed __aligned(256);
+} __attribute__((packed, aligned(256)));
 
 /**
  * @brief			Configuration parameters supported by the engine
