@@ -99,7 +99,7 @@ struct dla_network_desc {
 	int16_t input_layer;
 	uint8_t dynamic_roi;
 	uint8_t reserved0;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 /**
  * @name Memory types
@@ -128,7 +128,7 @@ struct dla_consumer {
 	int16_t index; /* the index of dla_common_op_desc in dep_graph_addr */
 	uint8_t event;
 	uint8_t res;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_common_op_desc {
 	int16_t index; /* set by ucode */
@@ -140,13 +140,13 @@ struct dla_common_op_desc {
 
 	struct dla_consumer consumers[DLA_OP_NUM];
 	struct dla_consumer fused_parent;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_roi_array_desc {
 	uint32_t array_length;
 
 	uint32_t array_reserved;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_roi_desc {
 	uint32_t left;
@@ -156,7 +156,7 @@ struct dla_roi_desc {
 	uint32_t right;
 
 	uint32_t bottom;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 /**
  * @ingroup BDMA
@@ -185,7 +185,7 @@ struct dla_bdma_transfer_desc {
 	uint32_t source_surface;
 
 	uint32_t destination_surface;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_bdma_surface_desc {
 	uint8_t source_type;
@@ -193,18 +193,18 @@ struct dla_bdma_surface_desc {
 	uint16_t num_transfers;
 
 	struct dla_bdma_transfer_desc transfers[NUM_MAX_BDMA_OPS];
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_bdma_op_desc {
 	uint16_t num_transfers;
 	uint16_t reserved0;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_bdma_stat_desc {
 	uint32_t read_stall;
 	uint32_t write_stall;
 	uint32_t runtime;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 /**
  * @ingroup Convolution
@@ -319,7 +319,7 @@ struct dla_cvt_param {
 	uint8_t  enable;
 
 	int32_t  offset;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_data_cube {
 	uint16_t type; /* dla_mem_type */
@@ -340,7 +340,7 @@ struct dla_data_cube {
 
 	/* For Rubik only */
 	uint32_t plane_stride;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 #define PIXEL_OVERRIDE_UINT 0
 #define PIXEL_OVERRIDE_INT  1
@@ -362,7 +362,7 @@ struct dla_conv_surface_desc {
 
 	/* line stride for 2nd plane, must be 32bytes aligned */
 	uint32_t in_line_uv_stride;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_conv_op_desc {
 	/* Performance parameters */
@@ -452,7 +452,7 @@ struct dla_conv_op_desc {
 	/* output converter parameters, support truncate only */
 	struct dla_cvt_param out_cvt;
 
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_conv_stat_desc {
 	uint32_t data_read_stall;
@@ -465,7 +465,7 @@ struct dla_conv_stat_desc {
 	uint32_t inf_data_num;
 	uint32_t inf_weight_num;
 	uint32_t runtime;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 /**
  * @ingroup SDP
@@ -548,7 +548,7 @@ struct dla_float_data {
 	int16_t scale;
 	int8_t shifter;
 	uint8_t reserved0;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 /**
  * For INT pipeline, we use the struct above to represent a floating number;
@@ -598,7 +598,7 @@ struct dla_lut_param {
 	uint8_t underflow_priority;
 	uint8_t overflow_priority;
 	uint8_t method; /* dla_lut_method */
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_sdp_surface_desc {
 	/* Data cube */
@@ -616,7 +616,7 @@ struct dla_sdp_surface_desc {
 
 	/* Output cube */
 	struct dla_data_cube dst_data;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 #define SDP_OP_NONE		0
 #define SDP_OP_MUL		1
@@ -635,7 +635,7 @@ struct dla_sdp_surface_desc {
 struct dla_sdp_cvt {
 	struct dla_cvt_param alu_cvt;
 	struct dla_cvt_param mul_cvt;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_sdp_op {
 	uint8_t enable;
@@ -652,7 +652,7 @@ struct dla_sdp_op {
 	int32_t mul_operand;
 
 	struct dla_sdp_cvt  cvt;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_sdp_op_desc {
 	/* Precision parameters */
@@ -675,7 +675,7 @@ struct dla_sdp_op_desc {
 	struct dla_sdp_op x1_op;
 	struct dla_sdp_op x2_op;
 	struct dla_sdp_op y_op;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_sdp_stat_desc {
 	uint32_t nan_input_num;
@@ -689,7 +689,7 @@ struct dla_sdp_stat_desc {
 	uint32_t lut_lo_hit;
 	uint32_t saturation_count;
 	uint32_t runtime;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 #define POOL_MODE_AVG		0
 #define POOL_MODE_MAX		1
@@ -711,7 +711,7 @@ struct dla_pdp_surface_desc {
 	struct dla_data_cube src_data;
 
 	struct dla_data_cube dst_data;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_pdp_op_desc {
 	/* Performance parameters */
@@ -760,7 +760,7 @@ struct dla_pdp_op_desc {
 	 * multiplier(for FP16 mode)
 	 */
 	int32_t  padding_value[PDP_PAD_VAL_NUM];
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_pdp_stat_desc {
 	uint32_t inf_input_num;
@@ -768,14 +768,14 @@ struct dla_pdp_stat_desc {
 	uint32_t nan_output_num;
 	uint32_t write_stall;
 	uint32_t runtime;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_cdp_surface_desc {
 	/* Data cube */
 	struct dla_data_cube src_data;
 
 	struct dla_data_cube dst_data;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_cdp_op_desc {
 	/* Precision parameters */
@@ -795,7 +795,7 @@ struct dla_cdp_op_desc {
 	uint8_t  bypass_sqsum;
 	uint8_t  bypass_out_mul;
 	uint8_t  reserved0;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_cdp_stat_desc {
 	uint32_t nan_input_num;
@@ -809,14 +809,14 @@ struct dla_cdp_stat_desc {
 	uint32_t lut_lo_hit;
 	uint32_t saturation_count;
 	uint32_t runtime;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_rubik_surface_desc {
 	/* Data cube */
 	struct dla_data_cube src_data;
 
 	struct dla_data_cube dst_data;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 /* rubik mode */
 #define RUBIK_MODE_CONTRACT	0
@@ -829,13 +829,13 @@ struct dla_rubik_op_desc {
 	uint8_t precision;
 	uint8_t stride_x;
 	uint8_t stride_y;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 struct dla_rubik_stat_desc {
 	uint32_t read_stall;
 	uint32_t write_stall;
 	uint32_t runtime;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 union dla_surface_container {
 	struct dla_bdma_surface_desc bdma_surface;
@@ -880,6 +880,6 @@ struct dla_task_status {
 
 	uint16_t subframe;
 	uint16_t status_task;
-} __packed __aligned(4);
+} __attribute__((packed, aligned(4)));
 
 #endif

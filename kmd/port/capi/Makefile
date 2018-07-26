@@ -32,17 +32,17 @@ ifeq ($(TOOLCHAIN_PREFIX),)
 $(error Toolchain prefix missing)
 endif
 
-MODULE := libnvdla_firmware
+MODULE := libnvdla_kmd
 
 include $(ROOT)/make/macros.mk
 
-BUILDOUT ?= $(ROOT)/out/firmware
+BUILDOUT ?= $(ROOT)/out/kmd
 BUILDDIR := $(BUILDOUT)/$(MODULE)
 LIB := $(BUILDDIR)/$(MODULE).so
 
 INCLUDES :=
 MODULE_OPTFLAGS ?= -Os
-MODULE_COMPILEFLAGS := -g -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Werror-implicit-function-declaration
+MODULE_COMPILEFLAGS := -g -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function
 MODULE_CFLAGS := --std=c99
 MODULE_CPPFLAGS := --std=c++11 -fexceptions -fno-rtti
 

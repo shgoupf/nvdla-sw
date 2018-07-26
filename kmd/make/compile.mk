@@ -24,33 +24,46 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ROOT := $(TOP_KMD)
 
-TOOLCHAIN_PREFIX ?=
+# create a separate list of objects per source type
+MODULE_CSRCS := $(filter %.c,$(MODULE_SRCS))
+MODULE_CPPSRCS := $(filter %.cpp,$(MODULE_SRCS))
 
-ifeq ($(TOOLCHAIN_PREFIX),)
-$(error Toolchain prefix missing)
-endif
+MODULE_COBJS := $(call TOBUILDDIR,$(patsubst %.c,%.o,$(MODULE_CSRCS)))
+MODULE_CPPOBJS := $(call TOBUILDDIR,$(patsubst %.cpp,%.o,$(MODULE_CPPSRCS)))
 
-MODULE := libnvdla_firmware
+MODULE_OBJS := $(MODULE_COBJS) $(MODULE_CPPOBJS)
 
-include $(ROOT)/make/macros.mk
+#$(info MODULE_SRCS = $(MODULE_SRCS))
+#$(info MODULE_CSRCS = $(MODULE_CSRCS))
+#$(info MODULE_CPPSRCS = $(MODULE_CPPSRCS))
 
-BUILDOUT ?= $(ROOT)/out/firmware
-BUILDDIR := $(BUILDOUT)/$(MODULE)
-LIB := $(BUILDDIR)/$(MODULE).so
+#$(info MODULE_OBJS = $(MODULE_OBJS))
+#$(info MODULE_COBJS = $(MODULE_COBJS))
+#$(info MODULE_CPPOBJS = $(MODULE_CPPOBJS))
 
-INCLUDES :=
-MODULE_OPTFLAGS ?= -Os
-MODULE_COMPILEFLAGS := -g -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function -Werror-implicit-function-declaration
-MODULE_CFLAGS := --std=c99
-MODULE_CPPFLAGS := --std=c++11 -fexceptions -fno-rtti
+$(MODULE_OBJS): MODULE_CC:=$(MODULE_CC)
+$(MODULE_OBJS): MODULE_OPTFLAGS:=$(MODULE_OPTFLAGS)
+$(MODULE_OBJS): MODULE_COMPILEFLAGS:=$(MODULE_COMPILEFLAGS)
+$(MODULE_OBJS): MODULE_CFLAGS:=$(MODULE_CFLAGS)
+$(MODULE_OBJS): MODULE_CPPFLAGS:=$(MODULE_CPPFLAGS)
+$(MODULE_OBJS): MODULE_SRCDEPS:=$(MODULE_SRCDEPS)
+$(MODULE_OBJS): SRCDEPS:=$(SRCDEPS)
 
-all:: $(LIB)
+$(MODULE_OBJS): $(MODULE_SRCDEPS) $(SRCDEPS)
 
-include rules.mk
+$(MODULE_COBJS): $(BUILDDIR)/%.o: %.c $(SRCDEPS)
+	@$(MKDIR)
+	@echo compiling $<
+	$(MODULE_CC) $(MODULE_OPTFLAGS) $(MODULE_COMPILEFLAGS) $(MODULE_CFLAGS) $(MODULE_INCLUDES) $(INCLUDES) -c $< -MD -MT $@ -MF $(@:%o=%d) -o $@
 
-# the logic to compile and link stuff is in here
-$(LIB): $(ALLMODULE_OBJS)
-	@echo building $(MODULE)  $@
-	$(TOOLCHAIN_PREFIX)g++ -shared $(ALLMODULE_OBJS) -o $@
+$(MODULE_CPPOBJS): $(BUILDDIR)/%.o: %.cpp $(SRCDEPS)
+	@$(MKDIR)
+	@echo compiling $<
+	$(MODULE_CC) $(MODULE_OPTFLAGS) $(MODULE_COMPILEFLAGS) $(MODULE_CPPFLAGS) $(INCLUDES) $(MODULE_INCLUDES) -c $< -MD -MT $@ -MF $(@:%o=%d) -o $@
+
+# clear some variables we set here
+MODULE_CSRCS :=
+MODULE_CPPSRCS :=
+MODULE_COBJS :=
+MODULE_CPPOBJS :=
