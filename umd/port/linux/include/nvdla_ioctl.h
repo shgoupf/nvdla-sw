@@ -125,19 +125,19 @@ struct nvdla_gem_destroy_args {
     __u32 handle;
 };
 
-//#define DRM_NVDLA_SUBMIT        0x00
-//#define DRM_NVDLA_GEM_CREATE        0x01
-//#define DRM_NVDLA_GEM_MMAP      0x02
-//#define DRM_NVDLA_GEM_DESTROY       0x03
-//
-//#define DRM_IOCTL_NVDLA_SUBMIT DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_SUBMIT, struct nvdla_submit_args)
-//#define DRM_IOCTL_NVDLA_GEM_CREATE DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_CREATE, struct nvdla_gem_create_args)
-//#define DRM_IOCTL_NVDLA_GEM_MMAP DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_MMAP, struct nvdla_gem_map_offset_args)
-//#define DRM_IOCTL_NVDLA_GEM_DESTROY DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_DESTROY, struct nvdla_gem_destroy_args)
+#define DRM_NVDLA_SUBMIT        0x00
+#define DRM_NVDLA_GEM_CREATE        0x01
+#define DRM_NVDLA_GEM_MMAP      0x02
+#define DRM_NVDLA_GEM_DESTROY       0x03
 
-static int32_t nvdla_submit(struct snap_card *snap, void *arg);
-static int32_t nvdla_capi_mem_create(struct snap_card *drm, void *data, uint8_t* out_ptr);
-static int32_t nvdla_capi_mem_destroy(struct snap_card *snap, void *data, uint8_t* ptr);
-static int32_t nvdla_probe (int card_no);
+#define DRM_IOCTL_NVDLA_SUBMIT DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_SUBMIT, struct nvdla_submit_args)
+#define DRM_IOCTL_NVDLA_GEM_CREATE DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_CREATE, struct nvdla_gem_create_args)
+#define DRM_IOCTL_NVDLA_GEM_MMAP DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_MMAP, struct nvdla_gem_map_offset_args)
+#define DRM_IOCTL_NVDLA_GEM_DESTROY DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_DESTROY, struct nvdla_gem_destroy_args)
+
+//static int32_t nvdla_submit(struct snap_card *snap, void *arg);
+//static int32_t nvdla_capi_mem_create(struct snap_card *drm, void *data, uint8_t* out_ptr);
+//static int32_t nvdla_capi_mem_destroy(struct snap_card *snap, void *data, uint8_t* ptr);
+//static int32_t nvdla_probe (int card_no);
 
 #endif
