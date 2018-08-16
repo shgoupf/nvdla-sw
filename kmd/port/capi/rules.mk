@@ -33,11 +33,12 @@ NVDLA_KMD_SRC_FILES := \
 INCLUDES += \
     -I$(ROOT)/include \
     -I$(ROOT)/port/capi/include \
-    -I$(ROOT)/../../snap/software/include \
+    -I$(ACTION_ROOT)/../../software/include \
+    -I$(ACTION_ROOT)/sw \
     -I$(LOCAL_DIR)
 
-#MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
-#MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
+MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
+MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
 
 MODULE_SRCS := $(NVDLA_KMD_SRC_FILES)
 

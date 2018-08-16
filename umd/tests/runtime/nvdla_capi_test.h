@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int    nvdla_capi_test(int argc, char* argv[], int card_no);
+int nvdla_capi_test(char* loadable, char* input_path, char* image, int normalize, int rawdump);
 #ifdef __cplusplus
 }
 #endif

@@ -63,138 +63,39 @@ static NvDlaError launchTest(const TestAppArgs* appArgs)
     PROPAGATE_ERROR_FAIL(testSetup(appArgs, &testInfo));
 
     PROPAGATE_ERROR_FAIL(run(appArgs, &testInfo));
-
+    
 fail:
     return e;
 }
 
-int nvdla_capi_test(int argc, char* argv[], int card_no)
+int nvdla_capi_test(char* loadable, char* input_path, char* image, int normalize, int rawdump)
 {
     NvDlaError e = NvDlaError_TestApplicationFailed;
-    TestAppArgs testAppArgs = defaultTestAppArgs;
-    bool showHelp = false;
-    bool unknownArg = false;
-    bool missingArg = false;
     bool inputPathSet = false;
     bool serverMode = false;
+    TestAppArgs testAppArgs = defaultTestAppArgs;
+    testAppArgs.inputPath = std::string(input_path);
+    testAppArgs.inputName = std::string(image);
+    testAppArgs.loadableName = std::string(loadable);
+    testAppArgs.normalize_value = normalize;
+    testAppArgs.rawOutputDump = (rawdump > 0);
     NVDLA_UNUSED(inputPathSet);
 
-    NvS32 ii = 1;
-    while(true)
-    {
-        if (ii >= argc)
-            break;
+    ///* Check if any mandatory arguments are missing */
+    //if (strcmp(testAppArgs.loadableName.c_str(), "") == 0 && !serverMode) {
+    //    showHelp = true;
+    //    missingArg = true;
+    //}
 
-        const char* arg = argv[ii];
-
-        if (std::strcmp(arg, "-h") == 0) // help
-        {
-            // Print usage
-            showHelp = true;
-            break;
-        }
-        if (std::strcmp(arg, "-s") == 0) // server mode
-        {
-            // Print usage
-            serverMode = true;
-            break;
-        }
-        else if (std::strcmp(arg, "-i") == 0) // input path
-        {
-            if (ii+1 >= argc)
-            {
-                // Expecting another parameter
-                showHelp = true;
-                break;
-            }
-
-            testAppArgs.inputPath = std::string(argv[++ii]);
-            inputPathSet = true;
-        }
-        else if (std::strcmp(arg, "--image") == 0) // imagename
-        {
-            if (ii+1 >= argc)
-            {
-                // Expecting another parameter
-                showHelp = true;
-                break;
-            }
-
-            testAppArgs.inputName = std::string(argv[++ii]);
-        }
-        else if (std::strcmp(arg, "--loadable") == 0)
-        {
-            if (ii+1 >= argc)
-            {
-                // Expecting another parameter
-                showHelp = true;
-                break;
-            }
-
-            testAppArgs.loadableName = std::string(argv[++ii]);
-        }
-        else if (std::strcmp(arg, "--normalize") == 0) // normalize value
-        {
-            if (ii+1 >= argc)
-            {
-                // Expecting another parameter
-                showHelp = true;
-                break;
-            }
-
-            testAppArgs.normalize_value = atoi(argv[++ii]);
-        }
-        else if (std::strcmp(arg, "--rawdump") == 0)
-        {
-            testAppArgs.rawOutputDump = true;
-        }
-        else // unknown
-        {
-            // Unknown argument
-            unknownArg = true;
-            showHelp = true;
-            break;
-        }
-
-        ii++;
-    }
-
-    NvDlaDebugPrintf("Hello NVDLA!\n");
-    std::cout << "Hello NVDLA!" << std::endl;
-
-    //nvdla_probe(card_no);
-
-    /* Check if any mandatory arguments are missing */
-    if (strcmp(testAppArgs.loadableName.c_str(), "") == 0 && !serverMode) {
-        showHelp = true;
-        missingArg = true;
-    }
-
-    if (showHelp)
-    {
-        NvDlaDebugPrintf("Usage: %s [-options] --loadable <loadable_file>\n", argv[0]);
-        NvDlaDebugPrintf("where options include:\n");
-        NvDlaDebugPrintf("    -h                    print this help message\n");
-        NvDlaDebugPrintf("    -s                    launch test in server mode\n");
-        NvDlaDebugPrintf("    --image <file>        input jpg/pgm file\n");
-        NvDlaDebugPrintf("    --normalize <value>   normalize value for input image\n");
-        NvDlaDebugPrintf("    --rawdump             dump raw dimg data\n");
-
-        if (unknownArg || missingArg)
-            return EXIT_FAILURE;
-        else
-            return EXIT_SUCCESS;
-    }
-
-    if (serverMode)
-    {
-        e = launchServer(&testAppArgs);
-    }
-    else
-    {
+    //if (serverMode)
+    //{
+    //    e = launchServer(&testAppArgs);
+    //}
+    //else
+    //{
         // Launch
         e = launchTest(&testAppArgs);
-    }
+    //}
 
     if (e != NvDlaSuccess)
     {

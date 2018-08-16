@@ -53,10 +53,16 @@
 #include <libsnap.h>
 #include <snap_tools.h>
 #include <snap_s_regs.h>
+#include <snap_nvdla_constants.h>
 
 #include <nvdla_interface.h>
 #include <nvdla_capi.h>
 #include <nvdla_ioctl.h>
+
+static uint32_t CURRENT_ADDR_BAR       = 0x00000000;
+static const uint32_t ADDR_BAR_MASK    = 0x0003FC00;
+static const uint32_t ADDR_OFFSET_MASK = 0x000003FC;
+static const uint32_t ADDR_BAR_NUM_BIT = 10;
 
 static struct nvdla_config nvdla_config_os_initial = {
     .atom_size = 32,
@@ -122,6 +128,19 @@ int64_t dla_get_time_us (void)
     return 0;
 }
 
+uint32_t dla_snap_bar_handle (struct snap_card* h, uint32_t addr)
+{
+    uint32_t bar = addr & ADDR_BAR_MASK;
+    uint32_t offset = addr & ADDR_OFFSET_MASK;
+
+    if (bar != CURRENT_ADDR_BAR) {
+        CURRENT_ADDR_BAR = bar;
+        snap_mmio_write32(h, ACTION_BAR, bar>>ADDR_BAR_NUM_BIT);
+    }
+
+    return offset;
+}
+
 void dla_reg_write (void* driver_context, uint32_t addr, uint32_t reg)
 {
     struct nvdla_device* nvdla_dev =
@@ -131,7 +150,10 @@ void dla_reg_write (void* driver_context, uint32_t addr, uint32_t reg)
         return;
     }
 
-    snap_mmio_write32 (nvdla_dev->snap_card_handle, nvdla_dev->base + addr, reg);
+
+    snap_mmio_write32 (nvdla_dev->snap_card_handle,
+                       dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr),
+                       reg);
 }
 
 uint32_t dla_reg_read (void* driver_context, uint32_t addr)
@@ -144,7 +166,9 @@ uint32_t dla_reg_read (void* driver_context, uint32_t addr)
         return 0;
     }
 
-    snap_mmio_read32 (nvdla_dev->snap_card_handle, nvdla_dev->base + addr, &data);
+    snap_mmio_read32 (nvdla_dev->snap_card_handle,
+                      dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr),
+                      &data);
 
     return data;
 }
