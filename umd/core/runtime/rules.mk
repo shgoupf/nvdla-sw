@@ -46,12 +46,13 @@ INCLUDES += \
     -I$(ROOT)/core/include \
     -I$(ROOT)/core/common/include \
     -I$(ROOT)/port/linux/include \
+    -I$(TOP_KMD)/port/capi/include \
     -I$(ROOT)/external/include \
     -I$(LOCAL_DIR)/include \
     -I$(LOCAL_DIR)
 
-MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
-MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
+MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" -DCAPI
+MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" -DCAPI
 
 MODULE_SRCS := $(NVDLA_RUNTIME_SRC_FILES)
 

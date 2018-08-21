@@ -213,7 +213,7 @@ void *Runtime::getDLADeviceContext(size_t sel_i)
         }
 
         err = NvDlaOpen((void *)m_dla_handle, sel_i, (void **)&m_dla_device_handles[sel_i]);
-        ok = err == NvDlaSuccess;
+        ok = (err == NvDlaSuccess);
         if ( !ok ) {
             gLogError << "failed to open dla device" << endl;
             m_dla_device_handles[sel_i] = 0;
@@ -520,6 +520,9 @@ bool Runtime::fillTaskAddressList(Task *task, NvDlaTask *dla_task)
 
         dla_task->address_list[ali].handle = hMem;
         dla_task->address_list[ali].offset = m_address[address_list_entry_id].mEntry.offset;
+
+        gLogInfo << __func__ << " ali=" << ali << " -> mem_id=" << memory_id << " offset "
+            << std::hex << dla_task->address_list[ali].offset << endl;
     }
 
     return true;
@@ -652,6 +655,7 @@ NvDlaError Runtime::submitInternal()
 
                 case ILoadable::Interface_DLA1:
                 {
+                    gLogInfo << "Submitting to DLA1 interface" << endl;
                     void *dev;
                     NvDlaTask dla_task;
 
@@ -668,6 +672,7 @@ NvDlaError Runtime::submitInternal()
                 break;
                 case ILoadable::Interface_EMU1:
                 {
+                    gLogInfo << "Submitting to EMU1 interface" << endl;
                     EMUInterface *emu_if = new EMUInterfaceA();
 
                     NvU8* task_mem = new NvU8[emu_if->taskDescAccessor(0).struct_size()];
@@ -724,6 +729,8 @@ NvDlaError Runtime::allocateSystemMemory(void **phMem, NvU64 size, void **pData)
     /* Allocate memory for network */
     PROPAGATE_ERROR_FAIL( NvDlaAllocMem(NULL, hDla, phMem, pData, size, NvDlaHeap_System) );
     m_hmem_memory_map.insert(std::make_pair(*phMem, *pData));
+    gLogInfo << __func__ << " *phMem " << std::hex << *phMem << " *pData "
+        << std::hex << *pData << endl;
 
     return NvDlaSuccess;
 
@@ -792,6 +799,9 @@ NvDlaError Runtime::loadMemory(Loadable *l, Memory *memory)
         if (hMem == 0) {
             /* Allocate memory for network */
             PROPAGATE_ERROR_FAIL( NvDlaAllocMem(m_dla_handle, hDla, &hMem, (void **)(&mapped_mem), size, NvDlaHeap_System) );
+
+            gLogInfo << __func__ << " hMem " << std::hex << (uint64_t*) hMem << " mapped_mem "
+                << std::hex << (uint64_t*)mapped_mem << endl;
 
             memory->setHandle(hMem);
             memory->setVirtAddr(mapped_mem);

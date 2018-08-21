@@ -759,6 +759,7 @@ dla_read_network_config(struct dla_engine *engine)
 		goto exit;
 	}
 
+        dla_debug("%s: address index: %d\n", __func__, network_addr);
 	/**
 	 * Read network descriptor, it has information for a network
 	 * such as all address indexes.
@@ -1070,6 +1071,8 @@ dla_execute_task(void *engine_context, void *task_data, void *config_data)
 	int32_t ret;
 	struct dla_engine *engine = (struct dla_engine *)engine_context;
 
+	dla_debug("Enter: %s\n", __func__);
+
 	if (engine == NULL) {
 		dla_error("engine is NULL\n");
 		ret = ERR(INVALID_INPUT);
@@ -1119,6 +1122,8 @@ dla_execute_task(void *engine_context, void *task_data, void *config_data)
 
 complete:
 	LOG_EVENT(0, 0, 0, LOG_TASK_END);
+
+	dla_debug("Exit: %s\n", __func__);
 
 	RETURN(ret);
 }

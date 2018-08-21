@@ -60,9 +60,14 @@
 #include <nvdla_ioctl.h>
 
 static uint32_t CURRENT_ADDR_BAR       = 0x00000000;
-static const uint32_t ADDR_BAR_MASK    = 0x0003FC00;
+static const uint32_t ADDR_BAR_MASK    = 0x0002FC00;
 static const uint32_t ADDR_OFFSET_MASK = 0x000003FC;
-static const uint32_t ADDR_BAR_NUM_BIT = 10;
+static const uint32_t ADDR_OFFSET_NUM_BIT = 10;
+
+struct nvdla_device* global_nvdla_dev = NULL;
+
+int verbose_flag = 1;
+int _dbg_flag = 1;
 
 static struct nvdla_config nvdla_config_os_initial = {
     .atom_size = 32,
@@ -83,7 +88,7 @@ void dla_debug (const char* str, ...)
     va_list args;
     va_start (args, str);
     //vprintf (pr_fmt (str), args);
-    printf (str, args);
+    vprintf (str, args);
     va_end (args);
 }
 
@@ -132,10 +137,17 @@ uint32_t dla_snap_bar_handle (struct snap_card* h, uint32_t addr)
 {
     uint32_t bar = addr & ADDR_BAR_MASK;
     uint32_t offset = addr & ADDR_OFFSET_MASK;
+    // Keep DLA selection bit (bit 8) high
+    uint32_t config_data = (0x100 | (bar>>ADDR_OFFSET_NUM_BIT));
+
+    dla_debug ("BAR handle: Addr = 'h%04x, BAR = 'h%x, OFFSET= 'h%x\n",
+            addr, bar, offset);
 
     if (bar != CURRENT_ADDR_BAR) {
         CURRENT_ADDR_BAR = bar;
-        snap_mmio_write32(h, ACTION_BAR, bar>>ADDR_BAR_NUM_BIT);
+        snap_mmio_write32(h, ACTION_CONFIG, config_data);
+        dla_debug ("Reg Write BAR: Addr = 'h%04x, Data = 'h%x\n",
+                ACTION_CONFIG, config_data);
     }
 
     return offset;
@@ -145,31 +157,41 @@ void dla_reg_write (void* driver_context, uint32_t addr, uint32_t reg)
 {
     struct nvdla_device* nvdla_dev =
         (struct nvdla_device*)driver_context;
+    uint32_t register_offset = 0;
 
     if (!nvdla_dev) {
         return;
     }
 
+    register_offset = 
+        dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr);
 
     snap_mmio_write32 (nvdla_dev->snap_card_handle,
-                       dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr),
+                       register_offset,
                        reg);
+
+    dla_debug ("Reg Write: Addr = 'h%04x, Data = 'h%x\n", addr, reg);
 }
 
 uint32_t dla_reg_read (void* driver_context, uint32_t addr)
 {
     struct nvdla_device* nvdla_dev =
         (struct nvdla_device*)driver_context;
+    uint32_t register_offset = 0;
     uint32_t data = 0;
 
     if (!nvdla_dev) {
         return 0;
     }
 
+    register_offset = 
+        dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr);
+
     snap_mmio_read32 (nvdla_dev->snap_card_handle,
-                      dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr),
+                      register_offset,
                       &data);
 
+    dla_debug ("Reg Read: Addr = 'h%04x, Data = 'h%x\n", addr, data);
     return data;
 }
 
@@ -198,13 +220,12 @@ static int32_t dla_read_dma_address (void* driver_context, void* task_data,
     int32_t ret = 0;
     struct nvdla_mem_handle* handles;
     //dma_addr_t* phys_addr = (dma_addr_t*) (dst);
-    uint32_t* addr = (uint32_t *) (dst);
+    uint64_t* addr = (uint64_t*) (dst);
     struct nvdla_device* nvdla_dev =
         (struct nvdla_device*)driver_context;
     struct nvdla_task* task = (struct nvdla_task*)task_data;
 
-    //if (index == -1 || index > task->num_addresses) {
-    if (index != 0) {
+    if (index == -1 || index > task->num_addresses) {
         return -EINVAL;
     }
 
@@ -215,7 +236,8 @@ static int32_t dla_read_dma_address (void* driver_context, void* task_data,
 
     /* Add offset to IOVA address */
     //*phys_addr = *phys_addr + handles[index].offset;
-    *addr = handles[index].offset;
+    //*addr = handles[index].offset;
+    *addr = handles[index].handle + handles[index].offset;
 
     return ret;
 }
@@ -264,7 +286,8 @@ int32_t dla_data_write (void* driver_context, void* task_data,
     struct nvdla_task* task = (struct nvdla_task*)task_data;
 
     handles = task->address_list;
-    ptr = handles[0].offset;
+    //ptr = handles[0].offset;
+    ptr = handles[dst].handle;
 
     if (!ptr) {
         pr_err ("%s: invalid memory handles %#llx\n", __func__,
@@ -315,7 +338,7 @@ int32_t dla_data_read (void* driver_context, void* task_data,
                        uint64_t src, void* dst,
                        uint32_t size, uint64_t offset)
 {
-    int32_t ret;
+    int32_t ret = 0;
     void* ptr = NULL;
     //struct dma_buf* buf;
     struct nvdla_mem_handle* handles;
@@ -323,8 +346,12 @@ int32_t dla_data_read (void* driver_context, void* task_data,
 
     handles = task->address_list;
 
-    // Only have 1 unified address
-    ptr = handles[0].offset;
+    dla_debug ("%s: handle %#llx, offset %#llx, num of addresses %d.\n",
+            __PRETTY_FUNCTION__,
+            handles[src].handle, handles[src].offset, task->num_addresses);
+
+    //ptr = handles[src].offset;
+    ptr = handles[src].handle;
 
     if (!ptr) {
         pr_err ("%s: invalid memory handles %#llx\n", __func__,
@@ -384,8 +411,7 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         return err;
     }
 
-    //pr_debug ("Wait for task complete\n");
-    printf ("Wait for task complete\n");
+    dla_debug ("%s: Wait for task complete\n", __PRETTY_FUNCTION__);
 
     while (1) {
         unsigned long flags;
@@ -393,6 +419,11 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         //wait_for_completion (&nvdla_dev->event_notifier);
 
         //spin_lock_irqsave (&nvdla_dev->nvdla_lock, flags);
+
+        dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
+        snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
+        dla_isr_handler (nvdla_dev->engine_context);
 
         err = dla_process_events (nvdla_dev->engine_context, &task_complete);
 
@@ -403,8 +434,7 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         }
     }
 
-    //pr_debug ("Task complete\n");
-    printf ("Task complete\n");
+    dla_debug ("%s: Task complete\n", __PRETTY_FUNCTION__);
     dla_clear_task (nvdla_dev->engine_context);
 
     return err;
@@ -423,19 +453,15 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 //    { },
 //};
 
-//static int32_t nvdla_probe (struct snap_card* snap)
-static int32_t nvdla_probe (int card_no)
+int32_t nvdla_probe (struct snap_card* snap)
 {
     char device[64];
     int32_t err = 0;
     struct resource* res;
     //struct device* dev = &snap->dev;
     const struct of_device_id* match;
-    struct snap_card* snap;
 
-    sprintf(device, "/dev/cxl/afu%d.0s", card_no);
-    snap = snap_card_alloc_dev(device, SNAP_VENDOR_ID_IBM, SNAP_DEVICE_ID_SNAP);
-
+    dla_debug ("%s: Creating NVDLA device on snap card.\n", __PRETTY_FUNCTION__);
     //if (!snap->dev.of_node) {
     //    return -EINVAL;
     //}
@@ -448,7 +474,9 @@ static int32_t nvdla_probe (int card_no)
     //}
 
     //nvdla_dev = devm_kzalloc (dev, sizeof (*nvdla_dev), GFP_KERNEL);
-    global_nvdla_dev = malloc (sizeof (*global_nvdla_dev));
+    //global_nvdla_dev = malloc (sizeof (*global_nvdla_dev));
+    global_nvdla_dev = alloc_mem (64, sizeof (*global_nvdla_dev));
+    dla_debug ("%s: global_nvdla_dev allocated @ %#llx.\n", global_nvdla_dev, __PRETTY_FUNCTION__);
 
     if (!global_nvdla_dev) {
         return -ENOMEM;
@@ -492,6 +520,7 @@ static int32_t nvdla_probe (int card_no)
     dla_register_driver (&global_nvdla_dev->engine_context, (void*)global_nvdla_dev);
     dla_clear_task (global_nvdla_dev->engine_context);
 
+    dla_debug ("%s: Done creating NVDLA device on snap card.\n", __PRETTY_FUNCTION__);
     //err = nvdla_drm_probe (nvdla_dev);
 
     //if (err) {

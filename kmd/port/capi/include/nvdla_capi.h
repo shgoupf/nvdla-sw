@@ -110,7 +110,18 @@ struct nvdla_device {
         struct snap_card* snap_card_handle;
 };
 
-static struct nvdla_device* global_nvdla_dev = NULL;
+static void* alloc_mem (int align, int size)
+{
+    void* a;
+    int size2 = size + align;
+
+    if (posix_memalign ((void**)&a, 4096, size2) != 0) {
+        pr_err ("FAILED: posix_memalign()");
+        return NULL;
+    }
+
+    return a;
+}
 
 ///**
 // * @brief			Submit task

@@ -35,6 +35,7 @@
 #include <nvdla_capi.h>
 #include <nvdla_ioctl.h>
 
+extern struct nvdla_device* global_nvdla_dev;
 //#define to_nvdla_obj(x) container_of(x, struct nvdla_gem_object, object)
 
 //struct nvdla_gem_object {
@@ -56,7 +57,9 @@ static int32_t nvdla_fill_task_desc(struct nvdla_ioctl_submit_task *local_task,
 	//handles = kzalloc(local_task->num_addresses *
 	//			sizeof(struct nvdla_mem_handle), GFP_KERNEL);
         
-	handles = malloc(local_task->num_addresses *
+	//handles = malloc(local_task->num_addresses *
+	//			sizeof(struct nvdla_mem_handle));
+	handles = alloc_mem (64, local_task->num_addresses *
 				sizeof(struct nvdla_mem_handle));
 	if (handles == NULL)
 		return -EFAULT;
@@ -79,7 +82,7 @@ static int32_t nvdla_fill_task_desc(struct nvdla_ioctl_submit_task *local_task,
 	return 0;
 }
 
-static int32_t nvdla_submit(struct snap_card *snap, void *arg)
+int32_t nvdla_submit(void *arg)
 				//	struct drm_file *file)
 {
 	int32_t err = 0;
@@ -103,11 +106,16 @@ static int32_t nvdla_submit(struct snap_card *snap, void *arg)
 	//	return -EFAULT;
 
 	//task = kzalloc(sizeof(*task), GFP_KERNEL);
-	task = malloc(sizeof(*task));
+	//task = malloc(sizeof(*task));
+	task = alloc_mem (64, sizeof(*task));
 	if (task == NULL)
 		return -EFAULT;
 
-        global_nvdla_dev->snap_card_handle = snap;
+        //global_nvdla_dev->snap_card_handle = snap;
+
+        if (!global_nvdla_dev) {
+                return -ENOMEM;
+        }
 
 	global_nvdla_dev->task = task;
 	//kref_init(&task->ref);
@@ -240,18 +248,25 @@ free_task_desc:
 //	return 0;
 //}
 
-static int32_t nvdla_capi_mem_create(struct snap_card *drm, void *data, uint8_t* out_ptr)
+int32_t nvdla_capi_mem_create(void *data, void* out)
 {
 	//struct nvdla_gem_object *nobj;
 	struct nvdla_capi_mem_create_args *args = data;
+	struct nvdla_capi_mem_map_offset_args *map_args = out;
 
 	//nobj = nvdla_gem_create_with_handle(file, drm, args->size,
 	//				 &args->handle);
 	//if (IS_ERR(nobj))
 	//	return PTR_ERR(nobj);
-        out_ptr = malloc(args->size);
+        //map_args->offset = malloc(args->size);
+        //map_args->handle = malloc(args->size);
+        map_args->handle = alloc_mem (64, args->size);
+        dla_debug ("%s: size: %d, allocated memory address: %#llx\n",
+                __PRETTY_FUNCTION__,
+                args->size,
+                map_args->handle);
 
-        if (out_ptr == NULL) {
+        if (map_args->handle == NULL) {
             return 1;
         }
 
@@ -392,7 +407,7 @@ static int32_t nvdla_capi_mem_create(struct snap_card *drm, void *data, uint8_t*
 //
 //	return drm_gem_dumb_destroy(file, drm, args->handle);
 //}
-static int32_t nvdla_capi_mem_destroy(struct snap_card *snap, void *data, uint8_t* ptr)
+int32_t nvdla_capi_mem_destroy(uint8_t* ptr)
 {
     if (ptr != NULL) {
         free(ptr);

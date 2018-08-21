@@ -291,7 +291,7 @@ processor_cdp_program(struct dla_processor_group *group)
 	cdp_reg_write(D_FUNC_BYPASS, reg);
 
 exit:
-	dla_debug("Exit: %s", __func__);
+	dla_debug("Exit: %s\n", __func__);
 	RETURN(ret);
 }
 
@@ -369,7 +369,7 @@ dla_cdp_program(struct dla_processor_group *group)
 {
 	int32_t ret;
 
-	dla_debug("Enter: %s", __func__);
+	dla_debug("Enter: %s\n", __func__);
 	dla_enable_intr(MASK(GLB_S_INTR_MASK_0, CDP_DONE_MASK1) |
 			MASK(GLB_S_INTR_MASK_0, CDP_DONE_MASK0));
 
@@ -378,6 +378,6 @@ dla_cdp_program(struct dla_processor_group *group)
 		goto exit;
 
 exit:
-	dla_debug("Exit: %s", __func__);
+	dla_debug("Exit: %s\n", __func__);
 	RETURN(ret);
 }

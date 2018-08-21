@@ -106,13 +106,12 @@ struct nvdla_capi_mem_create_args {
 /**
  * struct nvdla_gem_map_offset_args for mapping DMA buffer
  *
- * @handle		handle of the buffer
+ * @handle		handle of the buffer, used as virtual address to the buffer
  * @reserved		reserved for padding
  * @offset		offset updated by kernel after mapping
  */
 struct nvdla_capi_mem_map_offset_args {
-	__u32 handle;
-	__u32 reserved;
+	__u64 handle;
 	__u64 offset;
 };
 
@@ -123,6 +122,8 @@ struct nvdla_capi_mem_map_offset_args {
  */
 struct nvdla_capi_mem_destroy_args {
 	__u32 handle;
+	__u32 reserved;
+	__u64 offset;
 };
 
 //#define DRM_NVDLA_SUBMIT		0x00
@@ -135,9 +136,9 @@ struct nvdla_capi_mem_destroy_args {
 //#define DRM_IOCTL_NVDLA_GEM_MMAP DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_MMAP, struct nvdla_gem_map_offset_args)
 //#define DRM_IOCTL_NVDLA_GEM_DESTROY DRM_IOWR(DRM_COMMAND_BASE + DRM_NVDLA_GEM_DESTROY, struct nvdla_gem_destroy_args)
 
-static int32_t nvdla_submit(struct snap_card *snap, void *arg);
-static int32_t nvdla_capi_mem_create(struct snap_card *drm, void *data, uint8_t* out_ptr);
-static int32_t nvdla_capi_mem_destroy(struct snap_card *snap, void *data, uint8_t* ptr);
-static int32_t nvdla_probe (int card_no);
+int32_t nvdla_submit (void* arg);
+int32_t nvdla_capi_mem_create (void* data, void* out);
+int32_t nvdla_capi_mem_destroy (uint8_t* ptr);
+int32_t nvdla_probe (struct snap_card* snap);
 
 #endif
