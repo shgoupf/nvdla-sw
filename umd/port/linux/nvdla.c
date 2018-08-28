@@ -81,7 +81,7 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
     struct nvdla_capi_mem_map_offset_args map_args;
     //struct nvdla_gem_create_args create_args;
     //struct nvdla_gem_map_offset_args map_args;
-    NvDlaDeviceHandle hDlaDev = (NvDlaDeviceHandle)device_handle;
+    //NvDlaDeviceHandle hDlaDev = (NvDlaDeviceHandle)device_handle;
 
     hMem = (NvDlaMemHandle)malloc(sizeof(struct NvDlaMemHandleRec));
     //*mem_handle = hMem;
@@ -130,8 +130,8 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
 
     //err = nvdla_mem_map(pData, size, map_args.offset, hDlaDev->fd, NVDLA_MEM_WRITE | NVDLA_MEM_READ);
     //*pData = map_args.offset;
-    *pData = map_args.handle;
-    *mem_handle = map_args.handle;
+    *pData = (void*) (map_args.handle);
+    *mem_handle = (void*) (map_args.handle);
     //if (err) {
     //    goto free_mem_handle;
     //    return err;
@@ -139,7 +139,6 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
 
     return 0;
 
-free_gem_handle:
     NvDlaFreeMem(session_handle, device_handle, *mem_handle, *pData, size);
 free_mem_handle:
     free(hMem);
@@ -151,36 +150,37 @@ NvDlaError
 NvDlaFreeMem(void *session_handle, void *device_handle, void *mem_handle, void *pData, NvU32 size)
 {
     int err;
-    struct nvdla_capi_mem_destroy_args args;
+    //struct nvdla_capi_mem_destroy_args args;
     //struct nvdla_gem_destroy_args args;
-    NvDlaMemHandle hMem = (NvDlaMemHandle)mem_handle;
-    NvDlaDeviceHandle hDlaDev = (NvDlaDeviceHandle)device_handle;
+    //NvDlaMemHandle hMem = (NvDlaMemHandle)mem_handle;
+    //NvDlaDeviceHandle hDlaDev = (NvDlaDeviceHandle)device_handle;
 
-    if (hMem == 0)
-        return NvDlaError_BadParameter;
+    //if (hMem == 0)
+    //    return NvDlaError_BadParameter;
 
-    /* unmap data */
-    //err = munmap(pData, size);
-    if (err != 0) {
-        printf("Failed to unmap memory err=%d, errno=%d\n",err, errno);
-        return NvDlaError_BadParameter;
-    }
+    ///* unmap data */
+    ////err = munmap(pData, size);
+    //if (err != 0) {
+    //    printf("Failed to unmap memory err=%d, errno=%d\n",err, errno);
+    //    return NvDlaError_BadParameter;
+    //}
 
     /* Close the file handle corresponding to that mem */
-    if (hMem->fd != 0)
-        (void) close(hMem->fd);
+    //if (hMem->fd != 0)
+    //    (void) close(hMem->fd);
 
-    args.handle = hMem->prime_handle;
+    //args.handle = hMem->prime_handle;
+    //args.handle = mem_handle;
 
     //err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_DESTROY, &args);
-    err = nvdla_capi_mem_destroy((&args)->offset);
+    err = nvdla_capi_mem_destroy((uint8_t*) mem_handle);
 
     if (err) {
         printf("Failed to destroy handle err=%d errno=%d\n", err, errno);
         return NvDlaError_IoctlFailed;
     }
 
-    free(hMem);
+    //free(hMem);
 
     return NvDlaSuccess;
 }
@@ -188,7 +188,7 @@ NvDlaFreeMem(void *session_handle, void *device_handle, void *mem_handle, void *
 NvDlaError
 NvDlaSubmit(void *session_handle, void *device_handle, NvDlaTask *pTasks, NvU32 num_tasks)
 {
-    NvDlaDeviceHandle dla_device = (NvDlaDeviceHandle)device_handle;
+    //NvDlaDeviceHandle dla_device = (NvDlaDeviceHandle)device_handle;
     struct nvdla_mem_handle address_list[num_tasks][NVDLA_MAX_BUFFERS_PER_TASK];
     struct nvdla_ioctl_submit_task tasks[num_tasks];
     struct nvdla_submit_args args;
@@ -206,9 +206,9 @@ NvDlaSubmit(void *session_handle, void *device_handle, NvDlaTask *pTasks, NvU32 
 
         tasks[i].address_list = (uintptr_t)address_list[i];
         for (j = 0; j < num_addresses; j++) {
-            NvDlaMemHandle mem_handle = (NvDlaMemHandle)pTasks[i].address_list[j].handle;
+            //NvDlaMemHandle mem_handle = (NvDlaMemHandle)pTasks[i].address_list[j].handle;
 
-            printf("%s: addr idx %d, handle %#llx, offset %#llx\n",
+            printf("%s: addr idx %d, handle %p, offset %#x\n",
                     __func__, j, pTasks[i].address_list[j].handle, pTasks[i].address_list[j].offset);
 
             //address_list[i][j].handle = (uint32_t)mem_handle->fd;
@@ -278,7 +278,9 @@ NvDlaOpen(void *session_handle, NvU32 instance, void **device_handle)
 
     return NvDlaSuccess;
 
+#ifndef CAPI
 fail:
+#endif
     NvDlaFree(pContext);
     return e;
 }

@@ -69,19 +69,23 @@ struct nvdla_device* global_nvdla_dev = NULL;
 int verbose_flag = 1;
 int _dbg_flag = 1;
 
+#ifdef DLA_LARGE_CONFIG
 static struct nvdla_config nvdla_config_os_initial = {
     .atom_size = 32,
     .bdma_enable = true,
     .rubik_enable = true,
     .weight_compress_support = true,
 };
+#endif
 
+#ifdef DLA_SMALL_CONFIG
 static struct nvdla_config nvdla_config_small = {
     .atom_size = 8,
     .bdma_enable = false,
     .rubik_enable = false,
     .weight_compress_support = false,
 };
+#endif
 
 void dla_debug (const char* str, ...)
 {
@@ -197,7 +201,7 @@ uint32_t dla_reg_read (void* driver_context, uint32_t addr)
 
 static uint32_t nvdla_engine_isr (int32_t irq, void* data)
 {
-    unsigned long flags;
+    //unsigned long flags;
     struct nvdla_device* nvdla_dev = (struct nvdla_device*)data;
 
     if (!nvdla_dev) {
@@ -221,11 +225,11 @@ static int32_t dla_read_dma_address (void* driver_context, void* task_data,
     struct nvdla_mem_handle* handles;
     //dma_addr_t* phys_addr = (dma_addr_t*) (dst);
     uint64_t* addr = (uint64_t*) (dst);
-    struct nvdla_device* nvdla_dev =
-        (struct nvdla_device*)driver_context;
+    //struct nvdla_device* nvdla_dev =
+    //    (struct nvdla_device*)driver_context;
     struct nvdla_task* task = (struct nvdla_task*)task_data;
 
-    if (index == -1 || index > task->num_addresses) {
+    if (index == -1 || index > (int32_t)task->num_addresses) {
         return -EINVAL;
     }
 
@@ -237,7 +241,7 @@ static int32_t dla_read_dma_address (void* driver_context, void* task_data,
     /* Add offset to IOVA address */
     //*phys_addr = *phys_addr + handles[index].offset;
     //*addr = handles[index].offset;
-    *addr = handles[index].handle + handles[index].offset;
+    *addr = (__u64)(handles[index].handle) + handles[index].offset;
 
     return ret;
 }
@@ -248,7 +252,7 @@ static int32_t dla_read_cpu_address (void* driver_context, void* task_data,
     uint64_t* temp = (uint64_t*)dst;
     struct nvdla_task* task = (struct nvdla_task*)task_data;
 
-    if (index == -1 || index > task->num_addresses) {
+    if (index == -1 || index > (int32_t)task->num_addresses) {
         return -EINVAL;
     }
 
@@ -414,7 +418,7 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
     dla_debug ("%s: Wait for task complete\n", __PRETTY_FUNCTION__);
 
     while (1) {
-        unsigned long flags;
+        //unsigned long flags;
 
         //wait_for_completion (&nvdla_dev->event_notifier);
 
@@ -455,11 +459,11 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 
 int32_t nvdla_probe (struct snap_card* snap)
 {
-    char device[64];
+    //char device[64];
     int32_t err = 0;
-    struct resource* res;
+    //struct resource* res;
     //struct device* dev = &snap->dev;
-    const struct of_device_id* match;
+    //const struct of_device_id* match;
 
     dla_debug ("%s: Creating NVDLA device on snap card.\n", __PRETTY_FUNCTION__);
     //if (!snap->dev.of_node) {
@@ -487,7 +491,14 @@ int32_t nvdla_probe (struct snap_card* snap)
     //nvdla_dev->config_data = (struct nvdla_config*)match->data;
     // TODO: support nvdla small config for now, need to make it
     //       configurable via command line options.
+#ifdef DLA_SMALL_CONFIG
     global_nvdla_dev->config_data = &nvdla_config_small;
+#elif DLA_LARGE_CONFIG
+    global_nvdla_dev->config_data = &nvdla_config_os_initial;
+#else
+    dla_debug ("%s: invalid configuration, please choose DLA_SMALL_CONFIG or DLA_LARGE_CONFIG.\n", __PRETTY_FUNCTION__);
+    return -EINVAL;
+#endif
 
     //init_completion (&nvdla_dev->event_notifier);
 

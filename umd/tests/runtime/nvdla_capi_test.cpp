@@ -72,7 +72,7 @@ int nvdla_capi_test(char* loadable, char* input_path, char* image, int normalize
 {
     NvDlaError e = NvDlaError_TestApplicationFailed;
     bool inputPathSet = false;
-    bool serverMode = false;
+    //bool serverMode = false;
     TestAppArgs testAppArgs = defaultTestAppArgs;
     testAppArgs.inputPath = std::string(input_path);
     testAppArgs.inputName = std::string(image);

@@ -74,7 +74,7 @@ static int32_t nvdla_fill_task_desc(struct nvdla_ioctl_submit_task *local_task,
 	//	return -EFAULT;
 	//}
 
-        memcpy(handles, local_task->address_list,
+        memcpy(handles, (void*)(local_task->address_list),
                 (task->num_addresses * sizeof(struct nvdla_mem_handle)));
 
 	task->address_list = handles;
@@ -260,13 +260,13 @@ int32_t nvdla_capi_mem_create(void *data, void* out)
 	//	return PTR_ERR(nobj);
         //map_args->offset = malloc(args->size);
         //map_args->handle = malloc(args->size);
-        map_args->handle = alloc_mem (64, args->size);
+        map_args->handle = (__u64) alloc_mem (64, args->size);
         dla_debug ("%s: size: %d, allocated memory address: %#llx\n",
                 __PRETTY_FUNCTION__,
                 args->size,
                 map_args->handle);
 
-        if (map_args->handle == NULL) {
+        if ((void*)(map_args->handle) == NULL) {
             return 1;
         }
 

@@ -37,8 +37,12 @@ INCLUDES += \
     -I$(ACTION_ROOT)/sw \
     -I$(LOCAL_DIR)
 
-MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
-MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\""
+MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" \
+                   -DDLA_SMALL_CONFIG \
+                   -Wno-implicit-function-declaration 
+MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" \
+                 -DDLA_SMALL_CONFIG \
+                 -Wno-implicit-function-declaration 
 
 MODULE_SRCS := $(NVDLA_KMD_SRC_FILES)
 
