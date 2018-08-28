@@ -406,6 +406,8 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
     int32_t err = 0;
     uint32_t task_complete = 0;
 
+    snap_action_start((void*)nvdla_dev->snap_card_handle);
+
     nvdla_dev->task = task;
 
     err = dla_execute_task (nvdla_dev->engine_context, (void*)task, nvdla_dev->config_data);
