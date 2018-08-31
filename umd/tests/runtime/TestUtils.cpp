@@ -33,6 +33,7 @@
 
 #include "half.h"
 #include "nvdla_os_inf.h"
+#include "snap_tools.h"
 
 #include <fstream>
 #include <sstream>
@@ -45,6 +46,10 @@ NvDlaError DIMG2DlaBuffer(const NvDlaImage* image, void** pBuffer)
 
     memcpy(*pBuffer, image->m_pData, image->m_meta.size);
 
+    NvDlaDebugPrintf("%s: pBuffer %#llx\n", __PRETTY_FUNCTION__, *pBuffer);
+    NvDlaDebugPrintf("%s: pBuffer size %d\n", __PRETTY_FUNCTION__, image->m_meta.size);
+    __hexdump(stdout, *pBuffer, image->m_meta.size);
+
     return NvDlaSuccess;
 }
 
@@ -53,6 +58,9 @@ NvDlaError DlaBuffer2DIMG(void** pBuffer, NvDlaImage* image)
     if (!(*pBuffer) || !image)
         ORIGINATE_ERROR(NvDlaError_BadParameter);
 
+    NvDlaDebugPrintf("%s: pBuffer %#llx\n", __PRETTY_FUNCTION__, *pBuffer);
+    NvDlaDebugPrintf("%s: pBuffer size %d\n", __PRETTY_FUNCTION__, image->m_meta.size);
+    __hexdump(stdout, *pBuffer, image->m_meta.size);
     memcpy(image->m_pData, *pBuffer, image->m_meta.size);
 
     return NvDlaSuccess;

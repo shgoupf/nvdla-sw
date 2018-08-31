@@ -521,8 +521,10 @@ bool Runtime::fillTaskAddressList(Task *task, NvDlaTask *dla_task)
         dla_task->address_list[ali].handle = hMem;
         dla_task->address_list[ali].offset = m_address[address_list_entry_id].mEntry.offset;
 
-        gLogInfo << __func__ << " ali=" << ali << " -> mem_id=" << memory_id << " offset "
-            << std::hex << dla_task->address_list[ali].offset << endl;
+        gLogInfo << __func__ << " ali=" << ali << " -> mem_id=" << memory_id
+            << " offset " << std::hex << dla_task->address_list[ali].offset
+            << " handle " << std::hex << dla_task->address_list[ali].handle
+            << endl;
     }
 
     return true;

@@ -284,6 +284,7 @@ int32_t dla_data_write (void* driver_context, void* task_data,
                         uint32_t size, uint64_t offset)
 {
     int32_t ret;
+    uint32_t i;
     void* ptr = NULL;
     //struct dma_buf* buf;
     struct nvdla_mem_handle* handles;
@@ -324,8 +325,18 @@ int32_t dla_data_write (void* driver_context, void* task_data,
     //    goto end_cpu_access;
     //}
 
-
     memcpy ((void*) ((uint8_t*)ptr + offset), src, size);
+    dla_debug("%s: write data from %#llx to %#llx(%#llx) size %d\n", __PRETTY_FUNCTION__, 
+            src, ptr, offset, size);
+
+    i = 0;
+    while (i < size) {
+        dla_debug("%s: writing data from %#llx to %#llx(%#llx) with %#x\n", __PRETTY_FUNCTION__,
+                src, ptr, offset, *((uint8_t*)(ptr+offset)));
+        i++;
+        ptr++;
+        src++;
+    }
 
 //    dma_buf_vunmap (buf, ptr);
 //
@@ -405,16 +416,35 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 {
     int32_t err = 0;
     uint32_t task_complete = 0;
+    uint32_t i = 0;
 
     snap_action_start((void*)nvdla_dev->snap_card_handle);
 
     nvdla_dev->task = task;
+
+    // debug the address content
+    for (i = 0; i < task->num_addresses; i++) {
+        if (i == 5) {
+            dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
+                    task->address_list[i].handle);
+            __hexdump(stdout, task->address_list[i].handle, 2048);
+        }
+    }
 
     err = dla_execute_task (nvdla_dev->engine_context, (void*)task, nvdla_dev->config_data);
 
     if (err) {
         pr_err ("Task execution failed\n");
         return err;
+    }
+
+    // debug the address content
+    for (i = 0; i < task->num_addresses; i++) {
+        if (i == 5) {
+            dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
+                    task->address_list[i].handle);
+            __hexdump(stdout, task->address_list[i].handle, 2048);
+        }
     }
 
     dla_debug ("%s: Wait for task complete\n", __PRETTY_FUNCTION__);
@@ -429,6 +459,16 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
         snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
         dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
+
+        // debug the address content
+        for (i = 0; i < task->num_addresses; i++) {
+            if (i == 5) {
+                dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
+                        task->address_list[i].handle);
+                __hexdump(stdout, task->address_list[i].handle, 2048);
+            }
+        }
+
         dla_isr_handler (nvdla_dev->engine_context);
 
         err = dla_process_events (nvdla_dev->engine_context, &task_complete);
