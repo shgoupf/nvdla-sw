@@ -422,14 +422,14 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 
     nvdla_dev->task = task;
 
-    // debug the address content
-    for (i = 0; i < task->num_addresses; i++) {
-        if (i == 5) {
-            dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
-                    task->address_list[i].handle);
-            __hexdump(stdout, task->address_list[i].handle, 2048);
-        }
-    }
+    //// debug the address content
+    //for (i = 0; i < task->num_addresses; i++) {
+    //    if (i == 5) {
+    //        dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
+    //                task->address_list[i].handle);
+    //        __hexdump(stdout, task->address_list[i].handle, 2048);
+    //    }
+    //}
 
     err = dla_execute_task (nvdla_dev->engine_context, (void*)task, nvdla_dev->config_data);
 
@@ -438,14 +438,14 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         return err;
     }
 
-    // debug the address content
-    for (i = 0; i < task->num_addresses; i++) {
-        if (i == 5) {
-            dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
-                    task->address_list[i].handle);
-            __hexdump(stdout, task->address_list[i].handle, 2048);
-        }
-    }
+    //// debug the address content
+    //for (i = 0; i < task->num_addresses; i++) {
+    //    if (i == 5) {
+    //        dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
+    //                task->address_list[i].handle);
+    //        __hexdump(stdout, task->address_list[i].handle, 2048);
+    //    }
+    //}
 
     dla_debug ("%s: Wait for task complete\n", __PRETTY_FUNCTION__);
 
@@ -460,14 +460,14 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
         dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
 
-        // debug the address content
-        for (i = 0; i < task->num_addresses; i++) {
-            if (i == 5) {
-                dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
-                        task->address_list[i].handle);
-                __hexdump(stdout, task->address_list[i].handle, 2048);
-            }
-        }
+        //// debug the address content
+        //for (i = 0; i < task->num_addresses; i++) {
+        //    if (i == 5) {
+        //        dla_debug ("%s: address %#llx, \n", __PRETTY_FUNCTION__,
+        //                task->address_list[i].handle);
+        //        __hexdump(stdout, task->address_list[i].handle, 2048);
+        //    }
+        //}
 
         dla_isr_handler (nvdla_dev->engine_context);
 
