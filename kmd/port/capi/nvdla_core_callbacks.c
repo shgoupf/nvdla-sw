@@ -456,9 +456,22 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 
         //spin_lock_irqsave (&nvdla_dev->nvdla_lock, flags);
 
+        //// Disable the NVDLA register region
+        //if (snap_mmio_write32((void*)nvdla_dev->snap_card_handle, ACTION_CONFIG, 0x00000000)) {
+        //    err = 1;
+        //    break;
+        //}
+
         dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
         snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        //sleep(2);
         dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
+        //snap_action_start((void*)nvdla_dev->snap_card_handle);
+        //// Enable the NVDLA register region
+        //if (snap_mmio_write32((void*)nvdla_dev->snap_card_handle, ACTION_CONFIG, 0x00000100)) {
+        //    err = 1;
+        //    break;
+        //}
 
         //// debug the address content
         //for (i = 0; i < task->num_addresses; i++) {
