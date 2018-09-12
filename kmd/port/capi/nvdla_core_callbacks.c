@@ -69,7 +69,7 @@ struct nvdla_device* global_nvdla_dev = NULL;
 int verbose_flag = 1;
 int _dbg_flag = 1;
 
-#ifdef DLA_LARGE_CONFIG
+#ifdef DLA_FULL_CONFIG
 static struct nvdla_config nvdla_config_os_initial = {
     .atom_size = 32,
     .bdma_enable = true,
@@ -81,6 +81,15 @@ static struct nvdla_config nvdla_config_os_initial = {
 #ifdef DLA_SMALL_CONFIG
 static struct nvdla_config nvdla_config_small = {
     .atom_size = 8,
+    .bdma_enable = false,
+    .rubik_enable = false,
+    .weight_compress_support = false,
+};
+#endif
+
+#ifdef DLA_LARGE_CONFIG
+static struct nvdla_config nvdla_config_large = {
+    .atom_size = 32,
     .bdma_enable = false,
     .rubik_enable = false,
     .weight_compress_support = false,
@@ -416,7 +425,7 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 {
     int32_t err = 0;
     uint32_t task_complete = 0;
-    uint32_t i = 0;
+    //uint32_t i = 0;
 
     snap_action_start((void*)nvdla_dev->snap_card_handle);
 
@@ -549,6 +558,8 @@ int32_t nvdla_probe (struct snap_card* snap)
 #ifdef DLA_SMALL_CONFIG
     global_nvdla_dev->config_data = &nvdla_config_small;
 #elif DLA_LARGE_CONFIG
+    global_nvdla_dev->config_data = &nvdla_config_large;
+#elif DLA_FULL_CONFIG
     global_nvdla_dev->config_data = &nvdla_config_os_initial;
 #else
     dla_debug ("%s: invalid configuration, please choose DLA_SMALL_CONFIG or DLA_LARGE_CONFIG.\n", __PRETTY_FUNCTION__);

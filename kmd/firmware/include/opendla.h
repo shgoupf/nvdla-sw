@@ -32,7 +32,11 @@
 #ifdef DLA_SMALL_CONFIG
 #include <opendla_small.h>
 #else
+#ifdef DLA_LARGE_CONFIG
+#include <opendla_small.h>
+#else
 #include <opendla_initial.h>
+#endif
 #endif
 
 #endif

@@ -38,10 +38,10 @@ INCLUDES += \
     -I$(LOCAL_DIR)
 
 MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" \
-                   -DDLA_SMALL_CONFIG \
+                   -D$(DLA_CONFIG) \
                    -Wno-implicit-function-declaration 
 MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" \
-                 -DDLA_SMALL_CONFIG \
+                 -D$(DLA_CONFIG) \
                  -Wno-implicit-function-declaration 
 
 MODULE_SRCS := $(NVDLA_KMD_SRC_FILES)
