@@ -158,7 +158,10 @@ uint32_t dla_snap_bar_handle (struct snap_card* h, uint32_t addr)
 
     if (bar != CURRENT_ADDR_BAR) {
         CURRENT_ADDR_BAR = bar;
-        snap_mmio_write32(h, ACTION_CONFIG, config_data);
+        if (snap_mmio_write32(h, ACTION_CONFIG, config_data)) {
+            dla_info("!ERROR doing -- Reg Write BAR: Addr = 'h%04x, Data = 'h%x\n",
+                    ACTION_CONFIG, config_data);
+        }
         dla_debug ("Reg Write BAR: Addr = 'h%04x, Data = 'h%x\n",
                 ACTION_CONFIG, config_data);
     }
@@ -179,9 +182,11 @@ void dla_reg_write (void* driver_context, uint32_t addr, uint32_t reg)
     register_offset = 
         dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr);
 
-    snap_mmio_write32 (nvdla_dev->snap_card_handle,
+    if (snap_mmio_write32 (nvdla_dev->snap_card_handle,
                        register_offset,
-                       reg);
+                       reg)) {
+        dla_info ("!ERROR doing -- Reg Write: Addr = 'h%04x, Data = 'h%x\n", addr, reg);
+    }
 
     dla_debug ("Reg Write: Addr = 'h%04x, Data = 'h%x\n", addr, reg);
 }
@@ -200,9 +205,11 @@ uint32_t dla_reg_read (void* driver_context, uint32_t addr)
     register_offset = 
         dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr);
 
-    snap_mmio_read32 (nvdla_dev->snap_card_handle,
+    if (snap_mmio_read32 (nvdla_dev->snap_card_handle,
                       register_offset,
-                      &data);
+                      &data)) {
+        dla_info ("!ERROR doing -- Reg Read: Addr = 'h%04x, Data = 'h%x\n", addr, data);
+    }
 
     dla_debug ("Reg Read: Addr = 'h%04x, Data = 'h%x\n", addr, data);
     return data;
