@@ -46,9 +46,11 @@ NvDlaError DIMG2DlaBuffer(const NvDlaImage* image, void** pBuffer)
 
     memcpy(*pBuffer, image->m_pData, image->m_meta.size);
 
+#ifdef DEBUG_LOG
     NvDlaDebugPrintf("%s: pBuffer %#llx\n", __PRETTY_FUNCTION__, *pBuffer);
     NvDlaDebugPrintf("%s: pBuffer size %d\n", __PRETTY_FUNCTION__, image->m_meta.size);
     __hexdump(stdout, *pBuffer, image->m_meta.size);
+#endif
 
     return NvDlaSuccess;
 }
@@ -58,9 +60,11 @@ NvDlaError DlaBuffer2DIMG(void** pBuffer, NvDlaImage* image)
     if (!(*pBuffer) || !image)
         ORIGINATE_ERROR(NvDlaError_BadParameter);
 
+#ifdef DEBUG_LOG
     NvDlaDebugPrintf("%s: pBuffer %#llx\n", __PRETTY_FUNCTION__, *pBuffer);
     NvDlaDebugPrintf("%s: pBuffer size %d\n", __PRETTY_FUNCTION__, image->m_meta.size);
     __hexdump(stdout, *pBuffer, image->m_meta.size);
+#endif
     memcpy(image->m_pData, *pBuffer, image->m_meta.size);
 
     return NvDlaSuccess;

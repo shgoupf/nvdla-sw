@@ -49,6 +49,8 @@
  */
 
 #include <stdarg.h>
+#include <inttypes.h>
+#include <sys/time.h>
 
 #include <libsnap.h>
 #include <snap_tools.h>
@@ -98,11 +100,13 @@ static struct nvdla_config nvdla_config_large = {
 
 void dla_debug (const char* str, ...)
 {
+#ifdef DEBUG_LOG
     va_list args;
     va_start (args, str);
     //vprintf (pr_fmt (str), args);
     vprintf (str, args);
     va_end (args);
+#endif
 }
 
 void dla_info (const char* str, ...)
@@ -139,11 +143,29 @@ void* dla_memcpy (void* dest, const void* src, uint64_t len)
     return memcpy (dest, src, len);
 }
 
-int64_t dla_get_time_us (void)
+uint64_t dla_get_time_us (void)
 {
-    //return ktime_get_ns() / NSEC_PER_USEC;
-    //return ktime_get_ns();
-    return 0;
+    struct timeval t;
+
+    gettimeofday (&t, NULL);
+    return t.tv_sec * 1000000 + t.tv_usec;
+}
+
+void print_time (uint64_t elapsed, uint64_t frames)
+{
+    int t;
+    float fsize = (float) frames;
+    float ft;
+
+    if (elapsed > 10000) {
+        t = (int)elapsed / 1000;
+        ft = (1000 / (float)t) * fsize;
+        dla_info (" end after %d msec (%0.3f frames /sec)\n" , t, ft);
+    } else {
+        t = (int)elapsed;
+        ft = (1000000 / (float)t) * fsize;
+        dla_info (" end after %d usec (%0.3f frames/sec)\n", t, ft);
+    }
 }
 
 uint32_t dla_snap_bar_handle (struct snap_card* h, uint32_t addr)
@@ -311,7 +333,7 @@ int32_t dla_data_write (void* driver_context, void* task_data,
     ptr = handles[dst].handle;
 
     if (!ptr) {
-        pr_err ("%s: invalid memory handles %#llx\n", __func__,
+        pr_err ("%s: invalid memory handles 0x%" PRIx64 "\n", __func__,
                 handles[0].offset);
         ret = -ENOMEM;
 
@@ -385,7 +407,7 @@ int32_t dla_data_read (void* driver_context, void* task_data,
     ptr = handles[src].handle;
 
     if (!ptr) {
-        pr_err ("%s: invalid memory handles %#llx\n", __func__,
+        pr_err ("%s: invalid memory handles 0x%" PRIx64 "\n", __func__,
                 handles[0].offset);
         ret = -ENOMEM;
 
@@ -432,7 +454,8 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 {
     int32_t err = 0;
     uint32_t task_complete = 0;
-    //uint32_t i = 0;
+    uint64_t start_time;
+    uint64_t end_time;
 
     snap_action_start((void*)nvdla_dev->snap_card_handle);
 
@@ -446,6 +469,8 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
     //        __hexdump(stdout, task->address_list[i].handle, 2048);
     //    }
     //}
+
+    start_time = dla_get_time_us();
 
     err = dla_execute_task (nvdla_dev->engine_context, (void*)task, nvdla_dev->config_data);
 
@@ -508,8 +533,11 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
             break;
         }
     }
+    end_time = dla_get_time_us();
 
-    dla_debug ("%s: Task complete\n", __PRETTY_FUNCTION__);
+    print_time(end_time - start_time, 1);
+
+    dla_info ("%s: Task complete\n", __PRETTY_FUNCTION__);
     dla_clear_task (nvdla_dev->engine_context);
 
     return err;

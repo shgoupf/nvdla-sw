@@ -521,10 +521,13 @@ bool Runtime::fillTaskAddressList(Task *task, NvDlaTask *dla_task)
         dla_task->address_list[ali].handle = hMem;
         dla_task->address_list[ali].offset = m_address[address_list_entry_id].mEntry.offset;
 
-        gLogInfo << __func__ << " ali=" << ali << " -> mem_id=" << memory_id
-            << " offset " << std::hex << dla_task->address_list[ali].offset
-            << " handle " << std::hex << dla_task->address_list[ali].handle
-            << endl;
+        if ( debugTasks() || debugMemoryLayout() )
+        {
+            gLogInfo << __func__ << " ali=" << ali << " -> mem_id=" << memory_id
+                << " offset " << std::hex << dla_task->address_list[ali].offset
+                << " handle " << std::hex << dla_task->address_list[ali].handle
+                << endl;
+        }
     }
 
     return true;
@@ -731,8 +734,12 @@ NvDlaError Runtime::allocateSystemMemory(void **phMem, NvU64 size, void **pData)
     /* Allocate memory for network */
     PROPAGATE_ERROR_FAIL( NvDlaAllocMem(NULL, hDla, phMem, pData, size, NvDlaHeap_System) );
     m_hmem_memory_map.insert(std::make_pair(*phMem, *pData));
-    gLogInfo << __func__ << " *phMem " << std::hex << *phMem << " *pData "
-        << std::hex << *pData << endl;
+
+    if ( debugTasks() || debugMemoryLayout() )
+    {
+        gLogInfo << __func__ << " *phMem " << std::hex << *phMem << " *pData "
+            << std::hex << *pData << endl;
+    }
 
     return NvDlaSuccess;
 
@@ -802,8 +809,11 @@ NvDlaError Runtime::loadMemory(Loadable *l, Memory *memory)
             /* Allocate memory for network */
             PROPAGATE_ERROR_FAIL( NvDlaAllocMem(m_dla_handle, hDla, &hMem, (void **)(&mapped_mem), size, NvDlaHeap_System) );
 
-            gLogInfo << __func__ << " hMem " << std::hex << (uint64_t*) hMem << " mapped_mem "
-                << std::hex << (uint64_t*)mapped_mem << endl;
+            if ( debugTasks() || debugMemoryLayout() )
+            {
+                gLogInfo << __func__ << " hMem " << std::hex << (uint64_t*) hMem << " mapped_mem "
+                    << std::hex << (uint64_t*)mapped_mem << endl;
+            }
 
             memory->setHandle(hMem);
             memory->setVirtAddr(mapped_mem);

@@ -243,7 +243,7 @@ int32_t dla_get_dma_address(void *driver_context, void *task_data,
  * @return			Time value in micro-seconds
  *
  */
-int64_t dla_get_time_us(void);
+uint64_t dla_get_time_us(void);
 
 /**
  * @brief			Print debug message

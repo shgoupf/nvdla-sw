@@ -56,8 +56,8 @@ BUILDDIR := $(BUILDOUT)/$(MODULE)
 LIB := $(BUILDDIR)/$(MODULE).so
 
 INCLUDES :=
-MODULE_OPTFLAGS ?= -Os
-MODULE_COMPILEFLAGS := -g -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function
+MODULE_OPTFLAGS ?= -O3
+MODULE_COMPILEFLAGS := -fPIC -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function
 MODULE_CFLAGS := --std=c99
 MODULE_CPPFLAGS := --std=c++11 -fexceptions -fno-rtti
 

@@ -95,7 +95,9 @@ NvDlaAllocMem(void *session_handle, void *device_handle, void **mem_handle,
 
     //err = ioctl(hDlaDev->fd, DRM_IOCTL_NVDLA_GEM_CREATE, &create_args);
     err = nvdla_capi_mem_create(&create_args, &map_args);
+#ifdef DEBUG_LOG
     printf("CAPI: allocated memory address: %#llx\n", map_args.handle);
+#endif
 
     if (err) {
         printf("Failed to allocate handle err=%d errno=%d\n", err, errno);
@@ -208,8 +210,10 @@ NvDlaSubmit(void *session_handle, void *device_handle, NvDlaTask *pTasks, NvU32 
         for (j = 0; j < num_addresses; j++) {
             //NvDlaMemHandle mem_handle = (NvDlaMemHandle)pTasks[i].address_list[j].handle;
 
+#ifdef DEBUG_LOG
             printf("%s: addr idx %d, handle %p, offset %#x\n",
                     __func__, j, pTasks[i].address_list[j].handle, pTasks[i].address_list[j].offset);
+#endif
 
             //address_list[i][j].handle = (uint32_t)mem_handle->fd;
             // Use handle as virtual address

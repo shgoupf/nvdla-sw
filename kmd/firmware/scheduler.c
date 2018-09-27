@@ -672,7 +672,7 @@ dla_op_completion(struct dla_processor *processor,
 	if (ret)
 		goto exit;
 
-	dla_info("%d HWLs done, totally %d layers\n",
+	dla_debug("%d HWLs done, totally %d layers\n",
 				engine->num_proc_hwl,
 				engine->network->num_operations);
 

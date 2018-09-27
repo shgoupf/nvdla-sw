@@ -113,12 +113,48 @@ protected:
 
     virtual ~Runtime();
 
-    inline bool debugMemoryLayout() const  { return true; }
-    inline bool debugTasks() const { return true; }
-    inline bool debugVersions() const { return false; }
-    inline bool debugLoadables() const { return true; }
-    inline bool debugBinding() const { return true; }
-    inline bool debugStrideRewrite() const { return true; }
+    inline bool debugMemoryLayout() const  {
+#ifdef DEBUG_LOG
+        return true;
+#else
+        return false;
+#endif
+    }
+    inline bool debugTasks() const {
+#ifdef DEBUG_LOG
+        return true;
+#else
+        return false;
+#endif
+    }
+    inline bool debugVersions() const {
+#ifdef DEBUG_LOG
+        return true;
+#else
+        return false;
+#endif
+    }
+    inline bool debugLoadables() const {
+#ifdef DEBUG_LOG
+        return true;
+#else
+        return false;
+#endif
+    }
+    inline bool debugBinding() const {
+#ifdef DEBUG_LOG
+        return true;
+#else
+        return false;
+#endif
+    }
+    inline bool debugStrideRewrite() const {
+#ifdef DEBUG_LOG
+        return true;
+#else
+        return false;
+#endif
+    }
 
     NvDlaError submitInternal(void);
 
