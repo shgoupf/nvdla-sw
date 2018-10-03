@@ -270,6 +270,9 @@ int32_t nvdla_capi_mem_create(void *data, void* out)
             return 1;
         }
 
+        // init allocated memory with zeros
+        memset ((void*)map_args->handle, 0, args->size);
+
 	return 0;
 }
 //

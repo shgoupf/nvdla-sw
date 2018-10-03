@@ -49,12 +49,13 @@ INCLUDES += \
 MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_FIRMWARE\"" \
                    -Wno-unused-but-set-variable \
                    -Wno-implicit-function-declaration \
-		   -Wno-type-limits
+		   -Wno-type-limits \
+		   -D$(DLA_CONFIG)
 MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_FIRMWARE\"" \
                  -Wno-unused-but-set-variable \
                  -Wno-implicit-function-declaration \
 		 -Wno-type-limits \
-                 -DDLA_SMALL_CONFIG # use small config
+		 -D$(DLA_CONFIG)
 
 MODULE_SRCS := $(NVDLA_FIRMWARE_SRC_FILES)
 
