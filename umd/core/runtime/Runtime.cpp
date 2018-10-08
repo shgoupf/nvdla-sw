@@ -46,6 +46,8 @@
 
 #include "ErrorMacros.h"
 
+#include "snap_tools.h"
+
 using std::vector;
 using std::stringstream;
 using std::string;
@@ -478,6 +480,37 @@ done:
     return ok;
 }
 
+bool Runtime::printMemories(Task *task, NvDlaTask *dla_task)
+{
+    size_t num_task_addr_list_entries = dla_task->num_addresses;
+
+    if ( num_task_addr_list_entries > NVDLA_MAX_BUFFERS_PER_TASK )
+    {
+        gLogError << "too many address list entries." << endl;
+        return false;
+    }
+
+    for ( size_t ali = 0, ALI = num_task_addr_list_entries; ali != ALI; ++ali )
+    {
+        if (ali != 6) {
+            continue;
+        }
+
+        NvS16 address_list_entry_id = task->mEntry.address_list[ali];
+        NvS16 memory_id = m_address[address_list_entry_id].mem_id();
+
+        std::cout << "****** DEBUG MEMORY ******" << endl;
+        std::cout << __func__ << " ali=" << ali << " -> mem_id=" << memory_id
+                << " offset " << std::hex << dla_task->address_list[ali].offset
+                << " handle " << std::hex << dla_task->address_list[ali].handle
+                << endl;
+        std::cout << __func__ << " size = " << std::hex << m_address[address_list_entry_id].mEntry.size << endl;
+        __hexdump(stdout, dla_task->address_list[ali].handle + dla_task->address_list[ali].offset, m_address[address_list_entry_id].mEntry.size);
+    }
+
+    return true;
+}
+
 bool Runtime::fillTaskAddressList(Task *task, NvDlaTask *dla_task)
 {
     size_t num_memory_ids = m_memory.size();
@@ -672,7 +705,11 @@ NvDlaError Runtime::submitInternal()
 
                     fillTaskAddressList(task, &dla_task);
 
+                    //std::cout << "Before submitting task" << endl;
+                    //printMemories(task, &dla_task);
                     PROPAGATE_ERROR_FAIL( NvDlaSubmit(NULL, dev, &dla_task, 1) );
+                    //std::cout << "After submitting task" << endl;
+                    //printMemories(task, &dla_task);
                 }
                 break;
                 case ILoadable::Interface_EMU1:

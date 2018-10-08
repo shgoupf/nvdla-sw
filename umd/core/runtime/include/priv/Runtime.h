@@ -320,6 +320,7 @@ protected:
     NvDlaError loadMemory(Loadable *, Memory *);
     void unloadMemory(Memory *);
     bool fillTaskAddressList(Task *task, NvDlaTask *);
+    bool printMemories(Task *task, NvDlaTask *dla_task);
 
     bool fillEMUTaskAddressList(Task *task, EMUTaskDescAccessor taskDescAcc);
 
