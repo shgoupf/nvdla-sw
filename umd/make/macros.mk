@@ -33,3 +33,20 @@ MKDIR = if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
 
 # prepends the BUILD_DIR var to each item in the list
 TOBUILDDIR = $(addprefix $(BUILDDIR)/,$(1))
+
+DLA_CONFIG ?= 
+# setup DLA configuration
+ifeq ($(NVDLA_CONFIG),)
+$(error NVDLA_CONFIG missing, please specify NVDLA_CONFIG=nv_small or nv_large)
+endif
+
+$(info NOTICE!! NVDLA_CONFIG set to $(NVDLA_CONFIG))
+ifeq ($(NVDLA_CONFIG),nv_small)
+DLA_CONFIG := DLA_SMALL_CONFIG
+endif
+
+ifeq ($(NVDLA_CONFIG),nv_large)
+DLA_CONFIG := DLA_LARGE_CONFIG
+endif
+
+

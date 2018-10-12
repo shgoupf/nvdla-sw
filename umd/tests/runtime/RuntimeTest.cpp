@@ -73,7 +73,13 @@ static NvDlaError copyImageToInputTensor
 
     std::string imgPath = /*i->inputImagesPath + */appArgs->inputName;
     NvDlaImage* R8Image = new NvDlaImage();
+#ifdef DLA_LARGE_CONFIG
+    NvDlaImage* OutR8Image = NULL;
+#elif DLA_SMALL_CONFIG
+    NvDlaImage* OutR8Image = NULL;
+#else
     NvDlaImage* FF16Image = NULL;
+#endif
     TestImageTypes imageType = getImageType(imgPath);
     if (!R8Image)
         ORIGINATE_ERROR(NvDlaError_InsufficientMemory);
@@ -92,11 +98,25 @@ static NvDlaError copyImageToInputTensor
             goto fail;
     }
 
+#ifdef DLA_LARGE_CONFIG
+    OutR8Image = i->inputImage;
+    if (OutR8Image == NULL)
+        ORIGINATE_ERROR_FAIL(NvDlaError_BadParameter, "NULL input Image");
+    PROPAGATE_ERROR(createR8ImageCopy(appArgs, R8Image, OutR8Image));
+    PROPAGATE_ERROR(DIMG2DlaBuffer(OutR8Image, pImgBuffer));
+#elif DLA_SMALL_CONFIG
+    OutR8Image = i->inputImage;
+    if (OutR8Image == NULL)
+        ORIGINATE_ERROR_FAIL(NvDlaError_BadParameter, "NULL input Image");
+    PROPAGATE_ERROR(createR8ImageCopy(appArgs, R8Image, OutR8Image));
+    PROPAGATE_ERROR(DIMG2DlaBuffer(OutR8Image, pImgBuffer));
+#else // DLA_FULL_CONFIG
     FF16Image = i->inputImage;
     if (FF16Image == NULL)
         ORIGINATE_ERROR_FAIL(NvDlaError_BadParameter, "NULL input Image");
     PROPAGATE_ERROR(createFF16ImageCopy(appArgs, R8Image, FF16Image));
     PROPAGATE_ERROR(DIMG2DlaBuffer(FF16Image, pImgBuffer));
+#endif
 
 fail:
     if (R8Image != NULL && R8Image->m_pData != NULL)

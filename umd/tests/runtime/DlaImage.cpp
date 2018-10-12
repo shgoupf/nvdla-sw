@@ -170,7 +170,8 @@ NvS32 NvDlaImage::getAddrOffset(NvU32 w, NvU32 h, NvU32 c) const
         offset = ((h * m_meta.lineStride) + w) * bpe;
     }
     else if (m_meta.surfaceFormat == T_B8G8R8 ||
-             m_meta.surfaceFormat == T_R8G8B8)
+             m_meta.surfaceFormat == T_R8G8B8 ||
+             m_meta.surfaceFormat == T_R8G8B8A8)
     {
         offset = (h * m_meta.lineStride) + (w * m_meta.channel) + c;
     }

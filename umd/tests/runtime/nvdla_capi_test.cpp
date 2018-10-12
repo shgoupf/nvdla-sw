@@ -68,7 +68,7 @@ fail:
     return e;
 }
 
-int nvdla_capi_test(char* loadable, char* input_path, char* image, int normalize, int rawdump)
+int nvdla_capi_test(char* loadable, char* input_path, char* image, int normalize, int rawdump, float mean[4])
 {
     NvDlaError e = NvDlaError_TestApplicationFailed;
     bool inputPathSet = false;
@@ -79,6 +79,9 @@ int nvdla_capi_test(char* loadable, char* input_path, char* image, int normalize
     testAppArgs.loadableName = std::string(loadable);
     testAppArgs.normalize_value = normalize;
     testAppArgs.rawOutputDump = (rawdump > 0);
+    for (int i = 0; i < 4; i++) {
+        testAppArgs.mean[i] = mean[i];
+    }
     NVDLA_UNUSED(inputPathSet);
 
     ///* Check if any mandatory arguments are missing */

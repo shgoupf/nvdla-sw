@@ -64,3 +64,4 @@ NvDlaError DlaBuffer2DIMG(void** pBuffer, NvDlaImage* image);
 //NvDlaError createSync(NvU32 value, NvU32 condition, nvdla::ISync** sync);
 NvDlaError Tensor2DIMG(const nvdla::IRuntime::NvDlaTensor* pTDesc, NvDlaImage* image);
 NvDlaError createFF16ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDlaImage* out);
+NvDlaError createR8ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDlaImage* out);

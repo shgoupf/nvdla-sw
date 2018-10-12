@@ -47,9 +47,9 @@ NvDlaError DIMG2DlaBuffer(const NvDlaImage* image, void** pBuffer)
     memcpy(*pBuffer, image->m_pData, image->m_meta.size);
 
 #ifdef DEBUG_LOG
-    NvDlaDebugPrintf("%s: pBuffer %#llx\n", __PRETTY_FUNCTION__, *pBuffer);
-    NvDlaDebugPrintf("%s: pBuffer size %d\n", __PRETTY_FUNCTION__, image->m_meta.size);
-    __hexdump(stdout, *pBuffer, image->m_meta.size);
+    //NvDlaDebugPrintf("%s: pBuffer %#llx\n", __PRETTY_FUNCTION__, *pBuffer);
+    //NvDlaDebugPrintf("%s: pBuffer size %d\n", __PRETTY_FUNCTION__, image->m_meta.size);
+    //__hexdump(stdout, *pBuffer, image->m_meta.size);
 #endif
 
     return NvDlaSuccess;
@@ -151,6 +151,9 @@ NvDlaError createFF16ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDla
     out->m_meta.channel = in->m_meta.channel;
 
     NvS8 bpe = out->getBpe();
+
+    std::cout << "DEBUG -- bpe: " << std::dec << (uint32_t)bpe << std::endl;
+    
     if (bpe <= 0)
         ORIGINATE_ERROR(NvDlaError_BadParameter);
 
@@ -168,6 +171,79 @@ NvDlaError createFF16ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDla
     out->m_meta.lineStride = roundUp(out->m_meta.width * roundUp(out->m_meta.channel * bpe, strideAlign), strideAlign);
     out->m_meta.surfaceStride = roundUp(out->m_meta.lineStride * out->m_meta.height, strideAlign);
     out->m_meta.size = roundUp(out->m_meta.surfaceStride, sizeAlign);
+
+    std::cout << "DEBUG -- lineStride: " << std::dec << out->m_meta.lineStride << std::endl;
+    std::cout << "DEBUG -- surfaceStride: " << std::dec << out->m_meta.surfaceStride << std::endl;
+    std::cout << "DEBUG -- size: " << std::dec << out->m_meta.size << std::endl;
+
+    // Allocate the buffer
+    out->m_pData = NvDlaAlloc(out->m_meta.size);
+
+    // Copy the data
+    memset(out->m_pData, 0, out->m_meta.size);
+
+    NvU8* ibuf = static_cast<NvU8*>(in->m_pData);
+    NvU8* obuf = static_cast<NvU8*>(out->m_pData);
+
+    for (NvU32 y=0; y < in->m_meta.height; y++)
+    {
+        for (NvU32 x=0; x < in->m_meta.width; x++)
+        {
+            for (NvU32 z=0; z < in->m_meta.channel; z++)
+            {
+                NvS32 ioffset = in->getAddrOffset(x, y, z);
+                NvS32 ooffset = out->getAddrOffset(x, y, z);
+                std::cout << "DEBUG -- ioffset: " << std::dec << ioffset << std::endl;
+                std::cout << "DEBUG -- ooffset: " << std::dec << ooffset << std::endl;
+
+                if (ioffset < 0)
+                    ORIGINATE_ERROR(NvDlaError_BadParameter);
+                if (ooffset < 0)
+                    ORIGINATE_ERROR(NvDlaError_BadParameter);
+
+                NvU8* inp = ibuf + ioffset;
+                half_float::half* outp = reinterpret_cast<half_float::half*>(obuf + ooffset);
+                *outp = half_float::half((float(*inp) - float(appArgs->mean[z]))/appArgs->normalize_value);
+            }
+        }
+    }
+
+    return NvDlaSuccess;
+}
+
+// This format conversion can be generalized and moved to DlaImageUtils
+NvDlaError createR8ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDlaImage* out)
+{
+    out->m_meta.surfaceFormat = NvDlaImage::T_R8G8B8A8;
+    out->m_meta.width = in->m_meta.width;
+    out->m_meta.height = in->m_meta.height;
+    out->m_meta.channel = in->m_meta.channel;
+
+    NvS8 bpe = out->getBpe();
+
+    std::cout << "DEBUG -- bpe: " << std::dec << (uint32_t)bpe << std::endl;
+    
+    if (bpe <= 0)
+        ORIGINATE_ERROR(NvDlaError_BadParameter);
+
+    // Enforce stride and size alignment of 32B
+    NvU32 strideAlign = 32;
+    NvU32 sizeAlign = 32;
+    // These calculations work for channels <= 16
+    if (out->m_meta.channel > 16)
+        ORIGINATE_ERROR(NvDlaError_BadParameter);
+
+    // Number of input channels should be <= 4
+    if (in->m_meta.channel > 4)
+        ORIGINATE_ERROR(NvDlaError_BadParameter);
+
+    out->m_meta.lineStride = roundUp(out->m_meta.width * roundUp(out->m_meta.channel * bpe, strideAlign), strideAlign);
+    out->m_meta.surfaceStride = roundUp(out->m_meta.lineStride * out->m_meta.height, strideAlign);
+    out->m_meta.size = roundUp(out->m_meta.surfaceStride, sizeAlign);
+
+    std::cout << "DEBUG -- lineStride: " << std::dec << out->m_meta.lineStride << std::endl;
+    std::cout << "DEBUG -- surfaceStride: " << std::dec << out->m_meta.surfaceStride << std::endl;
+    std::cout << "DEBUG -- size: " << std::dec << out->m_meta.size << std::endl;
 
     // Allocate the buffer
     out->m_pData = NvDlaAlloc(out->m_meta.size);
@@ -193,8 +269,8 @@ NvDlaError createFF16ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDla
                     ORIGINATE_ERROR(NvDlaError_BadParameter);
 
                 NvU8* inp = ibuf + ioffset;
-                half_float::half* outp = reinterpret_cast<half_float::half*>(obuf + ooffset);
-                *outp = half_float::half((float(*inp) - float(appArgs->mean[z]))/appArgs->normalize_value);
+                NvS8* outp = reinterpret_cast<NvS8*>(obuf + ooffset);
+                *outp = (NvS8)((int(*inp) - int(appArgs->mean[z]))/appArgs->normalize_value);
             }
         }
     }
