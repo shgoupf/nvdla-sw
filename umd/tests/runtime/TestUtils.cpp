@@ -226,6 +226,7 @@ NvDlaError createR8ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDlaIm
     if (bpe <= 0)
         ORIGINATE_ERROR(NvDlaError_BadParameter);
 
+    NvU32 channelAlign = 4;
     // Enforce stride and size alignment of 32B
     NvU32 strideAlign = 32;
     NvU32 sizeAlign = 32;
@@ -237,7 +238,7 @@ NvDlaError createR8ImageCopy(const TestAppArgs* appArgs, NvDlaImage* in, NvDlaIm
     if (in->m_meta.channel > 4)
         ORIGINATE_ERROR(NvDlaError_BadParameter);
 
-    out->m_meta.lineStride = roundUp(out->m_meta.width * roundUp(out->m_meta.channel * bpe, strideAlign), strideAlign);
+    out->m_meta.lineStride = roundUp(out->m_meta.width * roundUp(out->m_meta.channel * bpe, channelAlign), strideAlign);
     out->m_meta.surfaceStride = roundUp(out->m_meta.lineStride * out->m_meta.height, strideAlign);
     out->m_meta.size = roundUp(out->m_meta.surfaceStride, sizeAlign);
 
