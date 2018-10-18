@@ -33,18 +33,22 @@ ifeq ($(TOOLCHAIN_PREFIX),)
 $(error Toolchain prefix missing)
 endif
 
-ifeq ($(NVDLA_CONFIG),)
-$(error NVDLA_CONFIG missing, please specify NVDLA_CONFIG=nv_small or nv_large)
-endif
-
-$(info NOTICE!! NVDLA_CONFIG set to $(NVDLA_CONFIG))
-ifeq ($(NVDLA_CONFIG),nv_small)
-DLA_CONFIG := DLA_SMALL_CONFIG
-endif
-
-ifeq ($(NVDLA_CONFIG),nv_large)
-DLA_CONFIG := DLA_LARGE_CONFIG
-endif
+#ifeq ($(NVDLA_CONFIG),)
+#$(error NVDLA_CONFIG missing, please specify NVDLA_CONFIG=nv_small or nv_large or nv_full)
+#endif
+#
+#$(info NOTICE!! NVDLA_CONFIG set to $(NVDLA_CONFIG))
+#ifeq ($(NVDLA_CONFIG),nv_small)
+#DLA_CONFIG := DLA_SMALL_CONFIG
+#endif
+#
+#ifeq ($(NVDLA_CONFIG),nv_large)
+#DLA_CONFIG := DLA_LARGE_CONFIG
+#endif
+#
+#ifeq ($(NVDLA_CONFIG),nv_full)
+#DLA_CONFIG := DLA_FULL_CONFIG
+#endif
 
 MODULE := libnvdla_firmware
 

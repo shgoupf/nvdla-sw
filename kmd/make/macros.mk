@@ -24,6 +24,22 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+ifeq ($(NVDLA_CONFIG),)
+$(error NVDLA_CONFIG missing, please specify NVDLA_CONFIG=nv_small or nv_large or nv_full)
+endif
+
+$(info NOTICE!! NVDLA_CONFIG set to $(NVDLA_CONFIG))
+ifeq ($(NVDLA_CONFIG),nv_small)
+DLA_CONFIG := DLA_SMALL_CONFIG
+endif
+
+ifeq ($(NVDLA_CONFIG),nv_large)
+DLA_CONFIG := DLA_LARGE_CONFIG
+endif
+
+ifeq ($(NVDLA_CONFIG),nv_full)
+DLA_CONFIG := DLA_FULL_CONFIG
+endif
 
 # Find the local dir of the make file
 GET_LOCAL_DIR    = $(patsubst %/,%,$(dir $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))))
