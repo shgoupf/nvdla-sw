@@ -49,4 +49,6 @@ ifeq ($(NVDLA_CONFIG),nv_large)
 DLA_CONFIG := DLA_LARGE_CONFIG
 endif
 
-
+ifeq ($(NVDLA_CONFIG),nv_full)
+DLA_CONFIG := DLA_FULL_CONFIG
+endif
