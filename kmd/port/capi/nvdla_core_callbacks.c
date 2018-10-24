@@ -62,7 +62,7 @@
 #include <nvdla_ioctl.h>
 
 static uint32_t CURRENT_ADDR_BAR       = 0x00000000;
-static const uint32_t ADDR_BAR_MASK    = 0x0002FC00;
+static const uint32_t ADDR_BAR_MASK    = 0x0001FC00;
 static const uint32_t ADDR_OFFSET_MASK = 0x000003FC;
 static const uint32_t ADDR_OFFSET_NUM_BIT = 10;
 
