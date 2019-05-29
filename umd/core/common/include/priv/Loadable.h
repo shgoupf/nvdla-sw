@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2017-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,12 +56,12 @@ public:
     static ILoadable *i(Loadable *);
     static ILoadable *self(void *s);
 
-    static ILoadable *deserializeFrom(const std::string &flatbuffer_file_name);
-    static ILoadable *deserializeLoadable(NvU8 *);
-
 protected:
     static BiMap<ILoadable *, Loadable *> s_priv;
     static BiMap<void *, ILoadable *> s_self;
+
+    friend class Runtime;
+    static ILoadable *deserializeLoadable(NvU8 *);
 };
 
 

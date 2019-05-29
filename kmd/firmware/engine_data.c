@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2017-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,6 +28,7 @@
 
 #include <nvdla_interface.h>
 #include <dla_interface.h>
+#include <dla_fw_version.h>
 
 #include "dla_engine_internal.h"
 
@@ -52,7 +53,7 @@ static struct dla_engine engine = {
 		.roi_index = 0,
 		.group_status = 0,
 		.rdma_status = 0,
-		.last_group = 0,
+		.last_group = 1,
 		.groups[0] = {
 			.id = 0,
 			.rdma_id = 0,
@@ -91,7 +92,7 @@ static struct dla_engine engine = {
 		.roi_index = 0,
 		.group_status = 0,
 		.rdma_status = 0,
-		.last_group = 0,
+		.last_group = 1,
 		.groups[0] = {
 			.id = 0,
 			.rdma_id = 0,
@@ -130,7 +131,7 @@ static struct dla_engine engine = {
 		.roi_index = 0,
 		.group_status = 0,
 		.rdma_status = 0,
-		.last_group = 0,
+		.last_group = 1,
 		.groups[0] = {
 			.id = 0,
 			.rdma_id = 0,
@@ -169,7 +170,7 @@ static struct dla_engine engine = {
 		.roi_index = 0,
 		.group_status = 0,
 		.rdma_status = 0,
-		.last_group = 0,
+		.last_group = 1,
 		.groups[0] = {
 			.id = 0,
 			.rdma_id = 0,
@@ -208,7 +209,7 @@ static struct dla_engine engine = {
 		.roi_index = 0,
 		.group_status = 0,
 		.rdma_status = 0,
-		.last_group = 0,
+		.last_group = 1,
 		.groups[0] = {
 			.id = 0,
 			.rdma_id = 0,
@@ -248,7 +249,7 @@ static struct dla_engine engine = {
 		.roi_index = 0,
 		.group_status = 0,
 		.rdma_status = 0,
-		.last_group = 0,
+		.last_group = 1,
 		.groups[0] = {
 			.id = 0,
 			.rdma_id = 0,
@@ -288,6 +289,8 @@ int32_t dla_register_driver(void **engine_context, void *driver_context)
 	engine.task->task_data = NULL;
 
 	dla_init_op_cache(&engine);
+
+	dla_info("%d . %d . %d\n", FIRMWARE_VERSION_MAJOR, FIRMWARE_VERSION_MINOR, FIRMWARE_VERSION_SUBMINOR);
 
 	RETURN(0);
 }

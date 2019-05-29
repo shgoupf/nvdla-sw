@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2017-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,16 +56,20 @@ public: // externally facing
     bool run();
 
 public: // internally facing
+    inline bool debugPrint() { return false; }
     inline bool debugOps() { return false; }
 
 protected:
     static void threadFunction(void* arg);
-    bool processTask(NvU8* task_mem, std::vector<NvU8*> addressList);
+    NvDlaError processTask(NvU8* task_mem, std::vector<NvU8*> addressList);
 
+    NvS8 getBpe(EMUBufferDescAccessor buffer);
     NvDlaError getAddrOffset(EMUBufferDescAccessor in, NvU32 x, NvU32 y, NvU32 c, NvU32* offset);
 
-    bool executePower(EMUPowerOpDescAccessor opDesc, EMUPowerBufferDescsAccessor bufDescs, std::vector<NvU8*> addressList);
-    bool executeSoftmax(EMUSoftmaxOpDescAccessor opDesc, EMUSoftmaxBufferDescsAccessor bufDescs, std::vector<NvU8*> addressList);
+    NvDlaError executePower(EMUPowerOpDescAccessor opDesc, EMUCommonOpDescAccessor commonOpDesc,
+                         EMUPowerBufferDescsAccessor bufDescs, std::vector<NvU8*> addressList);
+    NvDlaError executeSoftmax(EMUSoftmaxOpDescAccessor opDesc, EMUCommonOpDescAccessor commonOpDesc,
+                           EMUSoftmaxBufferDescsAccessor bufDescs, std::vector<NvU8*> addressList);
 
 private:
     std::queue<NvU8*> m_taskQueue;

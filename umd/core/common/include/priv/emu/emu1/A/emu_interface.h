@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, NVIDIA CORPORATION. All rights reserved.
+ * Copyright (c) 2017-2019, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -75,6 +75,8 @@ struct emu_network_desc
 struct emu_common_op_desc
 {
     NvU8 op_type;
+    NvF32 input_scale_factor;
+    NvF32 output_scale_factor;
 };
 
 struct emu_power_op_desc
@@ -101,6 +103,7 @@ struct emu_buffer_desc
 {
     /* offset to the actual IOVA in task.address_list */
     NvS16 addressIndex;
+    NvU32 addressIndexOffset;
     NvU32 size;
 
     /* surface format */

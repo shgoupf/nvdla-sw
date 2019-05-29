@@ -209,8 +209,9 @@ enum DataFormat {
   DataFormat_UNKNOWN = 0,
   DataFormat_NCHW = 1,
   DataFormat_NHWC = 2,
+  DataFormat_NCxHWx = 3,
   DataFormat_MIN = DataFormat_UNKNOWN,
-  DataFormat_MAX = DataFormat_NHWC
+  DataFormat_MAX = DataFormat_NCxHWx
 };
 
 inline const char **EnumNamesDataFormat() {
@@ -218,6 +219,7 @@ inline const char **EnumNamesDataFormat() {
     "UNKNOWN",
     "NCHW",
     "NHWC",
+    "NCxHWx",
     nullptr
   };
   return names;
@@ -234,8 +236,10 @@ enum DataType {
   DataType_HALF = 2,
   DataType_INT16 = 3,
   DataType_INT8 = 4,
+  DataType_UINT8 = 5,
+  DataType_UINT16 = 6,
   DataType_MIN = DataType_UNKNOWN,
-  DataType_MAX = DataType_INT8
+  DataType_MAX = DataType_UINT16
 };
 
 inline const char **EnumNamesDataType() {
@@ -245,6 +249,8 @@ inline const char **EnumNamesDataType() {
     "HALF",
     "INT16",
     "INT8",
+    "UINT8",
+    "UINT16",
     nullptr
   };
   return names;
@@ -341,8 +347,9 @@ enum PixelFormat {
   PixelFormat_Y16_U16V16_N444 = 34,
   PixelFormat_Y16_V16U16_N444 = 35,
   PixelFormat_FEATURE = 36,
+  PixelFormat_FEATURE_X8 = 37,
   PixelFormat_MIN = PixelFormat_R8,
-  PixelFormat_MAX = PixelFormat_FEATURE
+  PixelFormat_MAX = PixelFormat_FEATURE_X8
 };
 
 inline const char **EnumNamesPixelFormat() {
@@ -384,6 +391,7 @@ inline const char **EnumNamesPixelFormat() {
     "Y16_U16V16_N444",
     "Y16_V16U16_N444",
     "FEATURE",
+    "FEATURE_X8",
     nullptr
   };
   return names;
