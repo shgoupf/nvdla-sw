@@ -38,9 +38,9 @@
 //#include <linux/kref.h>
 
 #include <stdbool.h>
-#include <libsnap.h>
-#include <snap_tools.h>
-#include <snap_s_regs.h>
+#include <libosnap.h>
+#include <osnap_tools.h>
+#include <osnap_action_regs.h>
 
 //#include <linux/completion.h>
 //#include <linux/device.h>
@@ -108,6 +108,8 @@ struct nvdla_device {
 	void *engine_context;
 
         struct snap_card* snap_card_handle;
+
+        int eng_id;
 };
 
 static void* alloc_mem (int align, int size)

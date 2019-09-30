@@ -33,7 +33,7 @@
 
 #include "half.h"
 #include "nvdla_os_inf.h"
-#include "snap_tools.h"
+#include "osnap_tools.h"
 
 #include <fstream>
 #include <sstream>

@@ -46,7 +46,7 @@
 
 #include "ErrorMacros.h"
 
-#include "snap_tools.h"
+#include "osnap_tools.h"
 
 using std::vector;
 using std::stringstream;

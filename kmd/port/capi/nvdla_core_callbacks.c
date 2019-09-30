@@ -52,9 +52,9 @@
 #include <inttypes.h>
 #include <sys/time.h>
 
-#include <libsnap.h>
-#include <snap_tools.h>
-#include <snap_s_regs.h>
+#include <libosnap.h>
+#include <osnap_tools.h>
+#include <osnap_action_regs.h>
 #include <snap_nvdla_constants.h>
 
 #include <nvdla_interface.h>
@@ -168,25 +168,12 @@ void print_time (uint64_t elapsed, uint64_t frames)
     }
 }
 
-uint32_t dla_snap_bar_handle (struct snap_card* h, uint32_t addr)
+uint32_t dla_snap_bar_handle (struct snap_card* h, int eng_id, uint32_t addr)
 {
-    uint32_t bar = addr & ADDR_BAR_MASK;
-    uint32_t offset = addr & ADDR_OFFSET_MASK;
-    // Keep DLA selection bit (bit 8) high
-    uint32_t config_data = (0x100 | (bar>>ADDR_OFFSET_NUM_BIT));
+    uint32_t offset = addr + eng_id*0x20000 + 0x20000;
 
-    dla_debug ("BAR handle: Addr = 'h%04x, BAR = 'h%x, OFFSET= 'h%x\n",
-            addr, bar, offset);
-
-    if (bar != CURRENT_ADDR_BAR) {
-        CURRENT_ADDR_BAR = bar;
-        if (snap_mmio_write32(h, ACTION_CONFIG, config_data)) {
-            dla_info("!ERROR doing -- Reg Write BAR: Addr = 'h%04x, Data = 'h%x\n",
-                    ACTION_CONFIG, config_data);
-        }
-        dla_debug ("Reg Write BAR: Addr = 'h%04x, Data = 'h%x\n",
-                ACTION_CONFIG, config_data);
-    }
+    dla_debug ("Engine offset handle: Addr = 'h%04x, engine_id = 'h%x, OFFSET= 'h%x\n",
+            addr, eng_id, offset);
 
     return offset;
 }
@@ -202,9 +189,9 @@ void dla_reg_write (void* driver_context, uint32_t addr, uint32_t reg)
     }
 
     register_offset = 
-        dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr);
+        dla_snap_bar_handle(nvdla_dev->snap_card_handle, nvdla_dev->eng_id, addr);
 
-    if (snap_mmio_write32 (nvdla_dev->snap_card_handle,
+    if (snap_action_write32 (nvdla_dev->snap_card_handle,
                        register_offset,
                        reg)) {
         dla_info ("!ERROR doing -- Reg Write: Addr = 'h%04x, Data = 'h%x\n", addr, reg);
@@ -225,9 +212,9 @@ uint32_t dla_reg_read (void* driver_context, uint32_t addr)
     }
 
     register_offset = 
-        dla_snap_bar_handle(nvdla_dev->snap_card_handle, addr);
+        dla_snap_bar_handle(nvdla_dev->snap_card_handle, nvdla_dev->eng_id, addr);
 
-    if (snap_mmio_read32 (nvdla_dev->snap_card_handle,
+    if (snap_action_read32 (nvdla_dev->snap_card_handle,
                       register_offset,
                       &data)) {
         dla_info ("!ERROR doing -- Reg Read: Addr = 'h%04x, Data = 'h%x\n", addr, data);
@@ -503,10 +490,10 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         //    break;
         //}
 
-        dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
-        snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
-        //sleep(2);
-        dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
+        //dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
+        //snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        ////sleep(2);
+        //dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
         //snap_action_start((void*)nvdla_dev->snap_card_handle);
         //// Enable the NVDLA register region
         //if (snap_mmio_write32((void*)nvdla_dev->snap_card_handle, ACTION_CONFIG, 0x00000100)) {
@@ -556,7 +543,7 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
 //    { },
 //};
 
-int32_t nvdla_probe (struct snap_card* snap)
+int32_t nvdla_probe (struct snap_card* snap, int eng_id)
 {
     //char device[64];
     int32_t err = 0;
@@ -628,6 +615,7 @@ int32_t nvdla_probe (struct snap_card* snap)
     //if (err) {
     //    return err;
     //}
+    global_nvdla_dev->eng_id = eng_id;
 
     dla_register_driver (&global_nvdla_dev->engine_context, (void*)global_nvdla_dev);
     dla_clear_task (global_nvdla_dev->engine_context);

@@ -130,6 +130,6 @@ typedef struct snap_card snap_card_t;
 int32_t nvdla_submit (void* arg);
 int32_t nvdla_capi_mem_create (void* data, void* out);
 int32_t nvdla_capi_mem_destroy (uint8_t* ptr);
-int32_t nvdla_probe (snap_card_t* snap);
+int32_t nvdla_probe (snap_card_t* snap, int eng_id);
 
 #endif
