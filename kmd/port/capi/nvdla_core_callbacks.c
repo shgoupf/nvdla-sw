@@ -490,10 +490,10 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         //    break;
         //}
 
-        //dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
-        //snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
-        ////sleep(2);
-        //dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
+        dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
+        snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        //sleep(2);
+        dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
         //snap_action_start((void*)nvdla_dev->snap_card_handle);
         //// Enable the NVDLA register region
         //if (snap_mmio_write32((void*)nvdla_dev->snap_card_handle, ACTION_CONFIG, 0x00000100)) {
