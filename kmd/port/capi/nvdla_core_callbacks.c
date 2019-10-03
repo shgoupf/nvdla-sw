@@ -437,6 +437,31 @@ int32_t dla_data_read (void* driver_context, void* task_data,
     return ret;
 }
 
+static int nvdla_wait_interrupt (struct nvdla_device* nvdla_dev)
+{
+    uint32_t eng_mask = (1U << (nvdla_dev->eng_id));
+    uint32_t reg_data = 0;
+    int rc = 0;
+    while (1) {
+        snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        rc = snap_action_read32 (nvdla_dev->snap_card_handle, ACTION_INT_MASK, &reg_data);
+
+        if (0 != rc) {
+            dla_info ("%s: Failed to read action register ACTION_INT_MASK\n", __PRETTY_FUNCTION__);
+            return -1;
+        }
+
+        if ((reg_data & eng_mask) != 0) {
+            dla_debug ("%s: Got interrupt for eng %d, eng_mask: %#x\n", __PRETTY_FUNCTION__,
+                    nvdla_dev->eng_id, eng_mask);
+            snap_action_write32 (nvdla_dev->snap_card_handle, ACTION_INT_CTRL, eng_mask);
+            break;
+        }
+    }
+
+    return 0;
+}
+
 int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* task)
 {
     int32_t err = 0;
@@ -491,7 +516,13 @@ int32_t nvdla_task_submit (struct nvdla_device* nvdla_dev, struct nvdla_task* ta
         //}
 
         dla_debug ("%s: Waiting interrupt\n", __PRETTY_FUNCTION__);
-        snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        err = nvdla_wait_interrupt (nvdla_dev);
+
+        if (err) {
+            dla_info ("%s: ERROR waiting interrupt\n", __PRETTY_FUNCTION__);
+            break;
+        }
+
         //sleep(2);
         dla_debug ("%s: Done Waiting interrupt\n", __PRETTY_FUNCTION__);
         //snap_action_start((void*)nvdla_dev->snap_card_handle);

@@ -50,12 +50,14 @@ MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_FIRMWARE\"" \
                    -Wno-unused-but-set-variable \
                    -Wno-implicit-function-declaration \
 		   -Wno-type-limits \
-		   -D$(DLA_CONFIG)
+		   -D$(DLA_CONFIG) \
+		   -DDEBUG_LOG
 MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_FIRMWARE\"" \
                  -Wno-unused-but-set-variable \
                  -Wno-implicit-function-declaration \
 		 -Wno-type-limits \
-		 -D$(DLA_CONFIG)
+		 -D$(DLA_CONFIG) \
+		 -DDEBUG_LOG
 
 MODULE_SRCS := $(NVDLA_FIRMWARE_SRC_FILES)
 
