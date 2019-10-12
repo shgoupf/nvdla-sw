@@ -39,12 +39,12 @@ INCLUDES += \
 
 MODULE_CPPFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" \
                    -D$(DLA_CONFIG) \
-                   -Wno-implicit-function-declaration \
-		   -DDEBUG_LOG
+                   -Wno-implicit-function-declaration
+		   #-DDEBUG_LOG
 MODULE_CFLAGS += -DNVDLA_UTILS_ERROR_TAG="\"DLA_RUNTIME\"" \
                  -D$(DLA_CONFIG) \
-                 -Wno-implicit-function-declaration  \
-		 -DDEBUG_LOG
+                 -Wno-implicit-function-declaration
+		 #-DDEBUG_LOG
 
 MODULE_SRCS := $(NVDLA_KMD_SRC_FILES)
 

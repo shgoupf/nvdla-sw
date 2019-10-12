@@ -443,7 +443,13 @@ static int nvdla_wait_interrupt (struct nvdla_device* nvdla_dev)
     uint32_t reg_data = 0;
     int rc = 0;
     while (1) {
-        snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+        rc = snap_action_wait_interrupt((void*)nvdla_dev->snap_card_handle, NULL, 10000);
+
+        if (0 != rc) {
+            dla_info ("%s: Failed to wait interrupt\n", __PRETTY_FUNCTION__);
+            return -1;
+        }
+
         rc = snap_action_read32 (nvdla_dev->snap_card_handle, ACTION_INT_MASK, &reg_data);
 
         if (0 != rc) {
