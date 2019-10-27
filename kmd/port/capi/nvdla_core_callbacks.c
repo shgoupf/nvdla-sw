@@ -54,7 +54,7 @@
 
 #include <libosnap.h>
 #include <osnap_tools.h>
-#include <osnap_action_regs.h>
+//#include <osnap_action_regs.h>
 #include <snap_nvdla_constants.h>
 
 #include <nvdla_interface.h>

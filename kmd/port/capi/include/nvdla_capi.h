@@ -40,7 +40,7 @@
 #include <stdbool.h>
 #include <libosnap.h>
 #include <osnap_tools.h>
-#include <osnap_action_regs.h>
+//#include <osnap_action_regs.h>
 
 //#include <linux/completion.h>
 //#include <linux/device.h>
